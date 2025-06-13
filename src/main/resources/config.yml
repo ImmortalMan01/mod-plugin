@@ -1,0 +1,12 @@
+openai-key: "REPLACE_ME"
+threshold: 0.5
+punishments:
+  first: 5
+  second: 30
+  third: 1440
+  fourth: 10080
+blocked-categories:
+  - harassment
+  - hate
+  - sexual
+rate-limit: 60
