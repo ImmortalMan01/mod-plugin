@@ -151,14 +151,14 @@ public class DashboardGUI implements Listener {
                         case "reload" -> {
                             plugin.reloadFiles();
                             this.gui = plugin.getGuiConfig();
-                            viewer.sendMessage(ChatColor.GREEN + "Config reloaded");
+                            viewer.sendMessage(plugin.getMessages().get("reloaded"));
                             createMain();
                             openingNew = true;
                             viewer.openInventory(inventory);
                         }
                         case "clear" -> {
                             store.clear();
-                            viewer.sendMessage(ChatColor.GREEN + "Offence history cleared");
+                            viewer.sendMessage(plugin.getMessages().get("history-cleared"));
                             createMain();
                             openingNew = true;
                             viewer.openInventory(inventory);
