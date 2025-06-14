@@ -12,7 +12,8 @@ Belirtilen oyuncunun mevcut susturma cezasını kaldırır.
 Oyuncunun susturma durumunu gösterir. Eğer susturulmuşsa kalan süreyi dakika ve saniye olarak bildirir.
 
 ## /cm reload
-Yapılandırma ve dil dosyalarını yeniden yükler.
+Tüm ayarları yeniden okuyarak dinleyicileri yeniler. `openai-key`, `model`,
+`threshold` ve `rate-limit` de anında güncellenir.
 
 ## /cm
 Tüm komutların kısa açıklamalarını renkli biçimde listeler.

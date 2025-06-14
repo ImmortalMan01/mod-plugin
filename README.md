@@ -106,4 +106,6 @@ player:
 Hovering a player's head shows whether they are muted, the remaining time and
 how many offences they had in the last 24&nbsp;hours.
 
-Reload both `config.yml` and `gui.yml` with `/cm reload`.
+Use `/cm reload` to re-read all configuration files. OpenAI options such as
+`openai-key`, `model`, `threshold` and `rate-limit` are applied immediately and
+event listeners are re-registered without restarting the server.

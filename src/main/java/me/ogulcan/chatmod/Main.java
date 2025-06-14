@@ -8,6 +8,7 @@ import me.ogulcan.chatmod.service.ModerationService;
 import me.ogulcan.chatmod.storage.PunishmentStore;
 import me.ogulcan.chatmod.util.Messages;
 import org.bukkit.scheduler.BukkitTask;
+import org.bukkit.event.HandlerList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
@@ -71,6 +72,14 @@ public class Main extends JavaPlugin {
     }
 
     public void reloadFiles() {
+        reloadAll();
+    }
+
+    /**
+     * Reload configuration, language and GUI files and re-register listeners
+     * with a freshly created {@link ModerationService} instance.
+     */
+    public void reloadAll() {
         reloadConfig();
         String lang = getConfig().getString("language", "en");
         this.messages = new Messages(this, lang);
@@ -82,6 +91,18 @@ public class Main extends JavaPlugin {
                 this.guiConfig.setDefaults(def);
             }
         } catch (Exception ignored) {}
+
+        String apiKey = getConfig().getString("openai-key", "");
+        double threshold = getConfig().getDouble("threshold", 0.5);
+        int rateLimit = getConfig().getInt("rate-limit", 60);
+        String model = getConfig().getString("model", "omni-moderation-latest");
+        boolean debug = getConfig().getBoolean("debug", false);
+        this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug);
+
+        HandlerList.unregisterAll(this);
+        getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store), this);
+        getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
+        getServer().getPluginManager().registerEvents(new PrivateMessageListener(this, store), this);
     }
 
     public boolean isAutoMute() {

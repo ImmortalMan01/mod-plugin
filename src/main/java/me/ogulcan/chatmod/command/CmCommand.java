@@ -99,7 +99,7 @@ public class CmCommand implements CommandExecutor {
     }
 
     private boolean reload(CommandSender sender) {
-        plugin.reloadFiles();
+        plugin.reloadAll();
         sender.sendMessage(plugin.getMessages().get("reloaded"));
         return true;
     }
