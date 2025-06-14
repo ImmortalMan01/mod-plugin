@@ -77,6 +77,18 @@ public class ChatListener implements Listener {
         store.mute(uuid, minutes);
         new UnmuteTask(plugin, uuid, store).runTaskLater(plugin, minutes * 60L * 20L);
         player.sendMessage(plugin.getMessages().get("muted-player", minutes));
+
+        // Broadcast mute information to all players
+        int offences = store.offenceCount(uuid, Duration.ofHours(24).toMillis());
+        long remaining = store.remaining(uuid) / 1000;
+        String broadcast = plugin.getMessages().get(
+                "mute-broadcast",
+                player.getName(),
+                offences,
+                remaining / 60,
+                remaining % 60
+        );
+        Bukkit.broadcastMessage(broadcast);
     }
 
     private String format(long seconds) {
