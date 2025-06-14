@@ -5,8 +5,8 @@ threshold: 0.5
 punishments:
   first: 5
   second: 30
-  third: 1440
-  fourth: 10080
+  third: 60
+  fourth: 180
 blocked-categories:
   - harassment
   - harassment/threatening

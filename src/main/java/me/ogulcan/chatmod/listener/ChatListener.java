@@ -66,9 +66,9 @@ public class ChatListener implements Listener {
         } else if (offences24h == 1) {
             minutes = plugin.getConfig().getLong("punishments.second", 30);
         } else if (offences24h == 2) {
-            minutes = plugin.getConfig().getLong("punishments.third", 1440);
+            minutes = plugin.getConfig().getLong("punishments.third", 60);
         } else {
-            minutes = plugin.getConfig().getLong("punishments.fourth", 10080);
+            minutes = plugin.getConfig().getLong("punishments.fourth", 180);
             String msg = plugin.getMessages().get("repeated-offence", player.getName());
             Bukkit.getOnlinePlayers().stream()
                     .filter(p -> p.hasPermission("chatmoderation.notify"))
