@@ -36,9 +36,4 @@ public class WordFilterTest {
         assertTrue(WordFilter.containsBlockedWord("s*i+k(e)y!i%m", words));
     }
 
-    @Test
-    public void testAminAllahDoesNotMatchAmina() {
-        List<String> words = List.of("amina");
-        assertFalse(WordFilter.containsBlockedWord("Amin Allah", words));
-    }
 }

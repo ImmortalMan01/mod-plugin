@@ -55,7 +55,6 @@ The filter normalizes text when matching, converting Turkish letters like
 diacritics. Punctuation is converted to spaces so word boundaries are kept.
 Each token is checked against the block list and consecutive single-letter
 tokens are combined, allowing `s i k` to match a blocked word of `sik` while
-"Amin Allah" will not match `amina`.
 
 ### GUI Customization
 A separate `gui.yml` file controls the layout of the `/cm gui` dashboard. You can edit
