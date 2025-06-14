@@ -22,6 +22,7 @@ public class ChatListener implements Listener {
     private final List<String> categories;
     private final List<String> words;
     private final boolean useBlockedWords;
+    private final boolean useBlockedCategories;
 
     public ChatListener(Main plugin, ModerationService service, PunishmentStore store) {
         this.plugin = plugin;
@@ -30,6 +31,7 @@ public class ChatListener implements Listener {
         this.categories = plugin.getConfig().getStringList("blocked-categories");
         this.words = plugin.getConfig().getStringList("blocked-words");
         this.useBlockedWords = plugin.getConfig().getBoolean("use-blocked-words", true);
+        this.useBlockedCategories = plugin.getConfig().getBoolean("use-blocked-categories", true);
     }
 
     @EventHandler
@@ -50,7 +52,8 @@ public class ChatListener implements Listener {
         }
         service.moderate(message).thenAccept(result -> {
             if (!result.triggered) return;
-            boolean categoryMatch = result.scores.keySet().stream().anyMatch(categories::contains);
+            boolean categoryMatch = useBlockedCategories &&
+                    result.scores.keySet().stream().anyMatch(categories::contains);
             if (!categoryMatch && !result.blocked) return;
             Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player));
         });
