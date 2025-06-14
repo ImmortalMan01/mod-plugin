@@ -1,21 +1,35 @@
 package me.ogulcan.chatmod.util;
 
 import org.bukkit.ChatColor;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.java.JavaPlugin;
 
+import java.io.File;
+import java.io.InputStreamReader;
 import java.text.MessageFormat;
-import java.util.Locale;
-import java.util.ResourceBundle;
 
 public class Messages {
-    private final ResourceBundle bundle;
+    private final FileConfiguration config;
 
-    public Messages(String lang) {
-        Locale locale = Locale.forLanguageTag(lang);
-        this.bundle = ResourceBundle.getBundle("messages", locale);
+    public Messages(JavaPlugin plugin, String lang) {
+        String fileName = "messages_" + lang + ".yml";
+        File dataFile = new File(plugin.getDataFolder(), fileName);
+        if (!dataFile.exists()) {
+            plugin.saveResource(fileName, false);
+        }
+        this.config = YamlConfiguration.loadConfiguration(dataFile);
+
+        try (InputStreamReader reader = new InputStreamReader(plugin.getResource(fileName))) {
+            if (reader != null) {
+                YamlConfiguration def = YamlConfiguration.loadConfiguration(reader);
+                this.config.setDefaults(def);
+            }
+        } catch (Exception ignored) {}
     }
 
     public String get(String key, Object... args) {
-        String msg = bundle.getString(key);
+        String msg = config.getString(key, key);
         if (args.length > 0) {
             msg = MessageFormat.format(msg, args);
         }
