@@ -29,6 +29,7 @@ public class DashboardGUI implements Listener {
     private final Player viewer;
     private Inventory inventory;
     private UUID selected;
+    private boolean openingNew = false;
 
     public DashboardGUI(Main plugin, PunishmentStore store, Player viewer) {
         this.plugin = plugin;
@@ -75,6 +76,7 @@ public class DashboardGUI implements Listener {
     }
 
     public void open() {
+        openingNew = true;
         viewer.openInventory(inventory);
     }
 
@@ -89,6 +91,7 @@ public class DashboardGUI implements Listener {
                 if (slot / 9 < players.length) {
                     Player target = players[slot / 9];
                     selected = target.getUniqueId();
+                    openingNew = true;
                     viewer.openInventory(createPlayerMenu(target));
                 }
             } else if (slot == 8) {
@@ -96,6 +99,7 @@ public class DashboardGUI implements Listener {
                     plugin.reloadFiles();
                     viewer.sendMessage(ChatColor.GREEN + "Config reloaded");
                     createMain();
+                    openingNew = true;
                     viewer.openInventory(inventory);
                 }
             } else if (slot == 17) {
@@ -103,12 +107,14 @@ public class DashboardGUI implements Listener {
                     store.clear();
                     viewer.sendMessage(ChatColor.GREEN + "Offence history cleared");
                     createMain();
+                    openingNew = true;
                     viewer.openInventory(inventory);
                 }
             } else if (slot == 26) {
                 if (viewer.hasPermission("chatmoderation.admin")) {
                     plugin.setAutoMute(!plugin.isAutoMute());
                     createMain();
+                    openingNew = true;
                     viewer.openInventory(inventory);
                 }
             }
@@ -130,16 +136,19 @@ public class DashboardGUI implements Listener {
             } else if (e.getRawSlot() == 8) {
                 store.unmute(selected);
             }
+            openingNew = true;
             viewer.openInventory(inventory);
         }
     }
 
     @EventHandler
     public void onClose(InventoryCloseEvent e) {
-        if (e.getPlayer() == viewer
-                && e.getReason() != InventoryCloseEvent.Reason.OPEN_NEW) {
-            HandlerList.unregisterAll(this);
+        if (e.getPlayer() != viewer) return;
+        if (openingNew) {
+            openingNew = false;
+            return;
         }
+        HandlerList.unregisterAll(this);
     }
 
     @EventHandler
