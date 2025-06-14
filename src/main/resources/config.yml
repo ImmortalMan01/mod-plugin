@@ -1,4 +1,5 @@
 openai-key: "REPLACE_ME"
+model: omni-moderation-latest
 threshold: 0.5
 punishments:
   first: 5
