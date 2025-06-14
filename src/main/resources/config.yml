@@ -10,3 +10,11 @@ blocked-categories:
   - hate
   - sexual
 rate-limit: 60
+blocked-words:
+  - amk
+  - orospu
+  - pic
+  - sik
+  - yarak
+  - got
+  - amina

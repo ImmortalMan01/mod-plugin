@@ -2,6 +2,7 @@ package me.ogulcan.chatmod.listener;
 
 import me.ogulcan.chatmod.Main;
 import me.ogulcan.chatmod.service.ModerationService;
+import me.ogulcan.chatmod.service.WordFilter;
 import me.ogulcan.chatmod.storage.PunishmentStore;
 import me.ogulcan.chatmod.task.UnmuteTask;
 import org.bukkit.Bukkit;
@@ -21,12 +22,14 @@ public class ChatListener implements Listener {
     private final ModerationService service;
     private final PunishmentStore store;
     private final List<String> categories;
+    private final List<String> words;
 
     public ChatListener(Main plugin, ModerationService service, PunishmentStore store) {
         this.plugin = plugin;
         this.service = service;
         this.store = store;
         this.categories = plugin.getConfig().getStringList("blocked-categories");
+        this.words = plugin.getConfig().getStringList("blocked-words");
     }
 
     @EventHandler
@@ -39,7 +42,12 @@ public class ChatListener implements Listener {
             event.setCancelled(true);
             return;
         }
-        service.moderate(event.getMessage()).thenAccept(result -> {
+        String message = event.getMessage();
+        if (WordFilter.containsBlockedWord(message, words)) {
+            Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player));
+            return;
+        }
+        service.moderate(message).thenAccept(result -> {
             if (!result.triggered) return;
             boolean categoryMatch = result.scores.keySet().stream().anyMatch(categories::contains);
             if (!categoryMatch && !result.blocked) return;
