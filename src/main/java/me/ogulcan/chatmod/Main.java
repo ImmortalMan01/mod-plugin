@@ -1,8 +1,5 @@
 package me.ogulcan.chatmod;
 
-import me.ogulcan.chatmod.command.CMuteCommand;
-import me.ogulcan.chatmod.command.CStatusCommand;
-import me.ogulcan.chatmod.command.CUnmuteCommand;
 import me.ogulcan.chatmod.command.CmCommand;
 import me.ogulcan.chatmod.listener.ChatListener;
 import me.ogulcan.chatmod.service.ModerationService;
@@ -29,10 +26,7 @@ public class Main extends JavaPlugin {
         this.store = new PunishmentStore(new File(getDataFolder(), "data/punishments.json"));
         getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store), this);
 
-        getCommand("cmute").setExecutor(new CMuteCommand(store, this));
-        getCommand("cunmute").setExecutor(new CUnmuteCommand(store, this));
-        getCommand("cstatus").setExecutor(new CStatusCommand(store, this));
-        getCommand("cm").setExecutor(new CmCommand(this));
+        getCommand("cm").setExecutor(new CmCommand(this, store));
     }
 
     public PunishmentStore getStore() {
