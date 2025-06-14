@@ -16,13 +16,14 @@ import java.util.logging.Logger;
 
 public class ModerationService {
     private static final String URL = "https://api.openai.com/v1/moderations";
-    private static final String MODEL = "omni-moderation-latest";
+    private static final String DEFAULT_MODEL = "omni-moderation-latest";
     private final OkHttpClient client = new OkHttpClient();
     private final Gson gson = new Gson();
     private final String apiKey;
     private final double threshold;
     private final int rateLimit;
     private final Logger logger;
+    private final String model;
     private final boolean enabled;
     private final boolean debug;
     private Instant window = Instant.now();
@@ -32,8 +33,9 @@ public class ModerationService {
         return URL;
     }
 
-    public ModerationService(String apiKey, double threshold, int rateLimit, Logger logger, boolean debug) {
+    public ModerationService(String apiKey, String model, double threshold, int rateLimit, Logger logger, boolean debug) {
         this.apiKey = apiKey;
+        this.model = (model == null || model.isBlank()) ? DEFAULT_MODEL : model;
         this.threshold = threshold;
         this.rateLimit = rateLimit;
         this.logger = logger;
@@ -41,6 +43,9 @@ public class ModerationService {
         this.enabled = apiKey != null && !apiKey.isBlank() && !"REPLACE_ME".equals(apiKey);
         if (!enabled) {
             logger.warning("OpenAI API key missing or not set. Moderation requests will be skipped.");
+        }
+        if (debug) {
+            logger.info("Using moderation model: " + this.model);
         }
     }
 
@@ -136,8 +141,8 @@ public class ModerationService {
         });
     }
 
-    private static class Payload {
-        final String model = MODEL;
+    private class Payload {
+        final String model = ModerationService.this.model;
         final String input;
         Payload(String input) { this.input = input; }
     }
