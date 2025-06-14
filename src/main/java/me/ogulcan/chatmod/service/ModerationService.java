@@ -87,8 +87,8 @@ public class ModerationService {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                logger.log(Level.WARNING, "Moderation request failed", e);
                 if (debug) {
+                    logger.log(Level.WARNING, "Moderation request failed", e);
                     logger.info("Retrying in debug mode, attempt " + attempt);
                 }
                 if (attempt < 2) {
@@ -108,8 +108,8 @@ public class ModerationService {
                                     .execute(() -> sendRequest(message, future, attempt + 1));
                             return;
                         }
-                        logger.warning("OpenAI error: " + response.code());
                         if (debug) {
+                            logger.warning("OpenAI error: " + response.code());
                             logger.info("Response body: " + (rb != null ? rb.string() : "null"));
                         }
                         future.complete(new Result(false, false, new HashMap<>()));
