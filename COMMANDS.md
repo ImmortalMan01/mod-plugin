@@ -11,6 +11,9 @@ Belirtilen oyuncunun mevcut susturma cezasını kaldırır.
 ## /cm status <oyuncu>
 Oyuncunun susturma durumunu gösterir. Eğer susturulmuşsa kalan süreyi dakika ve saniye olarak bildirir.
 
+## /cm reload
+Yapılandırma ve dil dosyalarını yeniden yükler.
+
 ## /cm
 Tüm komutların kısa açıklamalarını renkli biçimde listeler.
 
