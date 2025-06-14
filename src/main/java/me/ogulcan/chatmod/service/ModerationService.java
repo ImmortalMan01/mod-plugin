@@ -23,6 +23,7 @@ public class ModerationService {
     private final double threshold;
     private final int rateLimit;
     private final Logger logger;
+    private final boolean enabled;
     private Instant window = Instant.now();
     private int count = 0;
 
@@ -35,6 +36,10 @@ public class ModerationService {
         this.threshold = threshold;
         this.rateLimit = rateLimit;
         this.logger = logger;
+        this.enabled = apiKey != null && !apiKey.isBlank() && !"REPLACE_ME".equals(apiKey);
+        if (!enabled) {
+            logger.warning("OpenAI API key missing or not set. Moderation requests will be skipped.");
+        }
     }
 
     private synchronized boolean incrementAndCheckRate() {
@@ -50,6 +55,10 @@ public class ModerationService {
 
     public CompletableFuture<Result> moderate(String message) {
         CompletableFuture<Result> future = new CompletableFuture<>();
+        if (!enabled) {
+            future.complete(new Result(false, false, new HashMap<>()));
+            return future;
+        }
         if (!incrementAndCheckRate()) {
             future.complete(new Result(false, false, new HashMap<>()));
             return future;
