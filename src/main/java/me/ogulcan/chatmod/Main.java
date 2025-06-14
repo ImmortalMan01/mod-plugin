@@ -5,6 +5,8 @@ import me.ogulcan.chatmod.listener.ChatListener;
 import me.ogulcan.chatmod.service.ModerationService;
 import me.ogulcan.chatmod.storage.PunishmentStore;
 import me.ogulcan.chatmod.util.Messages;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -13,11 +15,23 @@ public class Main extends JavaPlugin {
     private ModerationService moderationService;
     private PunishmentStore store;
     private Messages messages;
+    private FileConfiguration guiConfig;
     private boolean autoMute = true;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        File guiFile = new File(getDataFolder(), "gui.yml");
+        if (!guiFile.exists()) {
+            saveResource("gui.yml", false);
+        }
+        this.guiConfig = YamlConfiguration.loadConfiguration(guiFile);
+        try (java.io.InputStreamReader reader = new java.io.InputStreamReader(getResource("gui.yml"))) {
+            if (reader != null) {
+                YamlConfiguration def = YamlConfiguration.loadConfiguration(reader);
+                this.guiConfig.setDefaults(def);
+            }
+        } catch (Exception ignored) {}
         String lang = getConfig().getString("language", "en");
         this.messages = new Messages(this, lang);
         String apiKey = getConfig().getString("openai-key", "");
@@ -38,10 +52,22 @@ public class Main extends JavaPlugin {
         return messages;
     }
 
+    public FileConfiguration getGuiConfig() {
+        return guiConfig;
+    }
+
     public void reloadFiles() {
         reloadConfig();
         String lang = getConfig().getString("language", "en");
         this.messages = new Messages(this, lang);
+        File guiFile = new File(getDataFolder(), "gui.yml");
+        this.guiConfig = YamlConfiguration.loadConfiguration(guiFile);
+        try (java.io.InputStreamReader reader = new java.io.InputStreamReader(getResource("gui.yml"))) {
+            if (reader != null) {
+                YamlConfiguration def = YamlConfiguration.loadConfiguration(reader);
+                this.guiConfig.setDefaults(def);
+            }
+        } catch (Exception ignored) {}
     }
 
     public boolean isAutoMute() {

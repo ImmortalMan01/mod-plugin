@@ -113,7 +113,7 @@ public class CmCommand implements CommandExecutor {
             sender.sendMessage("No permission.");
             return true;
         }
-        new DashboardGUI(plugin, store, player).open();
+        new DashboardGUI(plugin, store, plugin.getGuiConfig(), player).open();
         return true;
     }
 }

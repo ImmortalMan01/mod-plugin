@@ -17,8 +17,10 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
+import org.bukkit.configuration.ConfigurationSection;
+import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Simple dashboard GUI for staff members.
@@ -26,44 +28,91 @@ import java.util.UUID;
 public class DashboardGUI implements Listener {
     private final Main plugin;
     private final PunishmentStore store;
+    private FileConfiguration gui;
     private final Player viewer;
     private Inventory inventory;
     private UUID selected;
     private boolean openingNew = false;
+    private List<Integer> playerSlots = new ArrayList<>();
+    private final Map<Integer, ButtonInfo> mainButtons = new HashMap<>();
+    private final Map<Integer, ButtonInfo> playerButtons = new HashMap<>();
 
-    public DashboardGUI(Main plugin, PunishmentStore store, Player viewer) {
+    private static class ButtonInfo {
+        final String action;
+        final int value;
+
+        ButtonInfo(String action, int value) {
+            this.action = action;
+            this.value = value;
+        }
+    }
+
+    public DashboardGUI(Main plugin, PunishmentStore store, FileConfiguration gui, Player viewer) {
         this.plugin = plugin;
         this.store = store;
+        this.gui = gui;
         this.viewer = viewer;
         createMain();
         Bukkit.getPluginManager().registerEvents(this, plugin);
     }
 
     private void createMain() {
-        inventory = Bukkit.createInventory(null, 54, ChatColor.DARK_GREEN + "ChatModeration");
-        int index = 0;
-        for (Player p : Bukkit.getOnlinePlayers()) {
-            if (index > 5) break;
+        int size = gui.getInt("main.size", 54);
+        String title = ChatColor.translateAlternateColorCodes('&', gui.getString("main.title", "ChatModeration"));
+        inventory = Bukkit.createInventory(null, size, title);
+        mainButtons.clear();
+        playerSlots = gui.getIntegerList("main.player-slots");
+
+        Player[] players = Bukkit.getOnlinePlayers().toArray(new Player[0]);
+        for (int i = 0; i < playerSlots.size() && i < players.length; i++) {
+            int slot = playerSlots.get(i);
+            Player p = players[i];
             ItemStack head = new ItemStack(Material.PLAYER_HEAD);
             SkullMeta meta = (SkullMeta) head.getItemMeta();
-            // Use legacy API to support both Paper and Spigot
             meta.setOwningPlayer(p);
             ChatColor color = store.isMuted(p.getUniqueId()) ? ChatColor.RED : ChatColor.GREEN;
             meta.setDisplayName(color + p.getName());
             head.setItemMeta(meta);
-            inventory.setItem(index * 9, head);
-            index++;
+            inventory.setItem(slot, head);
         }
-        inventory.setItem(8, item(Material.BOOK, ChatColor.YELLOW + "Reload Config"));
-        inventory.setItem(17, item(Material.PAPER, ChatColor.YELLOW + "Clear Offences"));
-        inventory.setItem(26, item(Material.LEVER, ChatColor.YELLOW + (plugin.isAutoMute() ? "Auto-Mute ON" : "Auto-Mute OFF")));
+
+        ConfigurationSection buttons = gui.getConfigurationSection("main.buttons");
+        if (buttons != null) {
+            for (String key : buttons.getKeys(false)) {
+                int slot = buttons.getInt(key + ".slot");
+                Material mat = Material.valueOf(buttons.getString(key + ".material", "STONE"));
+                String action = buttons.getString(key + ".action", "");
+                String name;
+                if ("toggle-automute".equals(action)) {
+                    String on = buttons.getString(key + ".name-on", "Auto-Mute ON");
+                    String off = buttons.getString(key + ".name-off", "Auto-Mute OFF");
+                    name = plugin.isAutoMute() ? on : off;
+                } else {
+                    name = buttons.getString(key + ".name", key);
+                }
+                name = ChatColor.translateAlternateColorCodes('&', name);
+                inventory.setItem(slot, item(mat, name));
+                mainButtons.put(slot, new ButtonInfo(action, buttons.getInt(key + ".value", 0)));
+            }
+        }
     }
 
     private Inventory createPlayerMenu(Player target) {
-        Inventory inv = Bukkit.createInventory(null, 9, target.getName());
-        inv.setItem(0, item(Material.ARROW, ChatColor.GREEN + "+5m"));
-        inv.setItem(1, item(Material.ARROW, ChatColor.RED + "-5m"));
-        inv.setItem(8, item(Material.BARRIER, ChatColor.RED + "Unmute"));
+        int size = gui.getInt("player.size", 9);
+        Inventory inv = Bukkit.createInventory(null, size, target.getName());
+        playerButtons.clear();
+        ConfigurationSection buttons = gui.getConfigurationSection("player.buttons");
+        if (buttons != null) {
+            for (String key : buttons.getKeys(false)) {
+                int slot = buttons.getInt(key + ".slot");
+                Material mat = Material.valueOf(buttons.getString(key + ".material", "STONE"));
+                String name = ChatColor.translateAlternateColorCodes('&', buttons.getString(key + ".name", key));
+                String action = buttons.getString(key + ".action", "");
+                int value = buttons.getInt(key + ".value", 0);
+                inv.setItem(slot, item(mat, name));
+                playerButtons.put(slot, new ButtonInfo(action, value));
+            }
+        }
         return inv;
     }
 
@@ -86,36 +135,41 @@ public class DashboardGUI implements Listener {
         if (e.getView().getTopInventory().equals(inventory) && e.getRawSlot() < inventory.getSize()) {
             e.setCancelled(true);
             int slot = e.getRawSlot();
-            if (slot % 9 == 0 && slot / 9 <= 5) { // player column
+            if (playerSlots.contains(slot)) {
                 Player[] players = Bukkit.getOnlinePlayers().toArray(new Player[0]);
-                if (slot / 9 < players.length) {
-                    Player target = players[slot / 9];
+                int idx = playerSlots.indexOf(slot);
+                if (idx < players.length) {
+                    Player target = players[idx];
                     selected = target.getUniqueId();
                     openingNew = true;
                     viewer.openInventory(createPlayerMenu(target));
                 }
-            } else if (slot == 8) {
-                if (viewer.hasPermission("chatmoderation.admin")) {
-                    plugin.reloadFiles();
-                    viewer.sendMessage(ChatColor.GREEN + "Config reloaded");
-                    createMain();
-                    openingNew = true;
-                    viewer.openInventory(inventory);
-                }
-            } else if (slot == 17) {
-                if (viewer.hasPermission("chatmoderation.admin")) {
-                    store.clear();
-                    viewer.sendMessage(ChatColor.GREEN + "Offence history cleared");
-                    createMain();
-                    openingNew = true;
-                    viewer.openInventory(inventory);
-                }
-            } else if (slot == 26) {
-                if (viewer.hasPermission("chatmoderation.admin")) {
-                    plugin.setAutoMute(!plugin.isAutoMute());
-                    createMain();
-                    openingNew = true;
-                    viewer.openInventory(inventory);
+            } else {
+                ButtonInfo btn = mainButtons.get(slot);
+                if (btn != null && viewer.hasPermission("chatmoderation.admin")) {
+                    switch (btn.action) {
+                        case "reload" -> {
+                            plugin.reloadFiles();
+                            this.gui = plugin.getGuiConfig();
+                            viewer.sendMessage(ChatColor.GREEN + "Config reloaded");
+                            createMain();
+                            openingNew = true;
+                            viewer.openInventory(inventory);
+                        }
+                        case "clear" -> {
+                            store.clear();
+                            viewer.sendMessage(ChatColor.GREEN + "Offence history cleared");
+                            createMain();
+                            openingNew = true;
+                            viewer.openInventory(inventory);
+                        }
+                        case "toggle-automute" -> {
+                            plugin.setAutoMute(!plugin.isAutoMute());
+                            createMain();
+                            openingNew = true;
+                            viewer.openInventory(inventory);
+                        }
+                    }
                 }
             }
         } else if (selected != null && e.getView().getTitle().equals(Bukkit.getOfflinePlayer(selected).getName())) {
@@ -123,18 +177,23 @@ public class DashboardGUI implements Listener {
             Player target = Bukkit.getPlayer(selected);
             if (target == null) return;
             if (!viewer.hasPermission("chatmoderation.admin")) return;
-            if (e.getRawSlot() == 0) {
-                long mins = store.remaining(selected) / 60000 + 5;
-                store.mute(selected, mins);
-                new UnmuteTask(plugin, selected, store).runTaskLater(plugin, mins * 60L * 20L);
-            } else if (e.getRawSlot() == 1) {
-                long mins = Math.max(0, store.remaining(selected) / 60000 - 5);
-                if (mins == 0) store.unmute(selected); else {
-                    store.mute(selected, mins);
-                    new UnmuteTask(plugin, selected, store).runTaskLater(plugin, mins * 60L * 20L);
+            ButtonInfo btn = playerButtons.get(e.getRawSlot());
+            if (btn != null) {
+                switch (btn.action) {
+                    case "add" -> {
+                        long mins = store.remaining(selected) / 60000 + btn.value;
+                        store.mute(selected, mins);
+                        new UnmuteTask(plugin, selected, store).runTaskLater(plugin, mins * 60L * 20L);
+                    }
+                    case "subtract" -> {
+                        long mins = Math.max(0, store.remaining(selected) / 60000 - btn.value);
+                        if (mins == 0) store.unmute(selected); else {
+                            store.mute(selected, mins);
+                            new UnmuteTask(plugin, selected, store).runTaskLater(plugin, mins * 60L * 20L);
+                        }
+                    }
+                    case "unmute" -> store.unmute(selected);
                 }
-            } else if (e.getRawSlot() == 8) {
-                store.unmute(selected);
             }
             openingNew = true;
             viewer.openInventory(inventory);
