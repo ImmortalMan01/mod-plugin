@@ -6,7 +6,6 @@ import me.ogulcan.chatmod.service.WordFilter;
 import me.ogulcan.chatmod.storage.PunishmentStore;
 import me.ogulcan.chatmod.task.UnmuteTask;
 import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -40,7 +39,7 @@ public class ChatListener implements Listener {
         UUID uuid = player.getUniqueId();
         if (store.isMuted(uuid)) {
             long rem = store.remaining(uuid) / 1000;
-            player.sendMessage(ChatColor.RED + "You are muted for " + format(rem) + ".");
+            player.sendMessage(plugin.getMessages().get("still-muted", format(rem)));
             event.setCancelled(true);
             return;
         }
@@ -69,14 +68,14 @@ public class ChatListener implements Listener {
             minutes = plugin.getConfig().getLong("punishments.third", 1440);
         } else {
             minutes = plugin.getConfig().getLong("punishments.fourth", 10080);
-            String msg = ChatColor.RED + player.getName() + " has been muted for repeated offences.";
+            String msg = plugin.getMessages().get("repeated-offence", player.getName());
             Bukkit.getOnlinePlayers().stream()
                     .filter(p -> p.hasPermission("chatmoderation.notify"))
                     .forEach(p -> p.sendMessage(msg));
         }
         store.mute(uuid, minutes);
         new UnmuteTask(plugin, uuid, store).runTaskLater(plugin, minutes * 60L * 20L);
-        player.sendMessage(ChatColor.RED + "You have been muted for " + minutes + " minutes.");
+        player.sendMessage(plugin.getMessages().get("muted-player", minutes));
     }
 
     private String format(long seconds) {

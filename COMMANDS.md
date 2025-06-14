@@ -11,4 +11,7 @@ Belirtilen oyuncunun mevcut susturma cezasını kaldırır.
 ## /cstatus <oyuncu>
 Oyuncunun susturma durumunu gösterir. Eğer susturulmuşsa kalan süreyi dakika ve saniye olarak bildirir.
 
+## /cm
+Tüm komutların kısa açıklamalarını renkli biçimde listeler.
+
 Ek olarak `chatmoderation.notify` yetkisine sahip olan oyuncular, otomatik susturma durumlarını bildiren uyarıları alır.

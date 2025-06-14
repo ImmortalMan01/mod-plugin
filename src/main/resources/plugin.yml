@@ -10,6 +10,8 @@ commands:
     permission: chatmoderation.command
   cstatus:
     permission: chatmoderation.command
+  cm:
+    permission: chatmoderation.command
 permissions:
   chatmoderation.command:
     description: Allows moderation commands
