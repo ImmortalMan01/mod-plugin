@@ -47,6 +47,10 @@ violence/graphic
 You can also define `blocked-words` for custom profanity detection. Any chat message
 containing one of these words will be muted without an API call. Set `use-blocked-words`
 to `false` to disable this list-based filter and rely solely on the OpenAI model.
+The filter normalizes text when matching, converting Turkish letters like
+`ş`, `ö`, `ç`, `ğ`, `ı` and `ü` to their ASCII equivalents and removing other
+diacritics. Variants such as `s\u0131key\u0131m` will therefore match a blocked
+word of `sikeyim`.
 
 ### GUI Customization
 A separate `gui.yml` file controls the layout of the `/cm gui` dashboard. You can edit
