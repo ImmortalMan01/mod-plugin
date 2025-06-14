@@ -24,6 +24,7 @@ blocked-categories:
 rate-limit: 250
 debug: false
 countdown-offline: true
+use-blocked-categories: true
 use-blocked-words: true
 blocked-words:
   - amk
