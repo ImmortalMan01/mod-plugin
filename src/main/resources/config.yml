@@ -23,6 +23,7 @@ blocked-categories:
   - violence/graphic
 rate-limit: 60
 debug: false
+countdown-offline: true
 use-blocked-words: true
 blocked-words:
   - amk

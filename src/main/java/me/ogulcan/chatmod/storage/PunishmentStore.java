@@ -10,7 +10,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Type;
-import java.time.Instant;
 import java.util.*;
 
 public class PunishmentStore {
@@ -27,6 +26,7 @@ public class PunishmentStore {
     public synchronized void mute(UUID uuid, long durationMinutes) {
         Offender offender = offenders.getOrDefault(uuid, new Offender());
         offender.muteUntil = System.currentTimeMillis() + durationMinutes * 60_000L;
+        offender.pausedRemaining = 0;
         offender.offences.add(System.currentTimeMillis());
         offenders.put(uuid, offender);
         save();
@@ -36,6 +36,7 @@ public class PunishmentStore {
         Offender offender = offenders.get(uuid);
         if (offender != null) {
             offender.muteUntil = 0;
+            offender.pausedRemaining = 0;
             save();
         }
     }
@@ -43,6 +44,9 @@ public class PunishmentStore {
     public synchronized boolean isMuted(UUID uuid) {
         Offender offender = offenders.get(uuid);
         if (offender == null) return false;
+        if (offender.pausedRemaining > 0) {
+            return true;
+        }
         if (offender.muteUntil <= System.currentTimeMillis()) {
             offender.muteUntil = 0;
             save();
@@ -54,7 +58,35 @@ public class PunishmentStore {
     public synchronized long remaining(UUID uuid) {
         Offender offender = offenders.get(uuid);
         if (offender == null) return 0L;
+        if (offender.pausedRemaining > 0) return offender.pausedRemaining;
         return Math.max(0L, offender.muteUntil - System.currentTimeMillis());
+    }
+
+    public synchronized void pause(UUID uuid) {
+        Offender offender = offenders.get(uuid);
+        if (offender == null) return;
+        if (offender.muteUntil > System.currentTimeMillis()) {
+            offender.pausedRemaining = offender.muteUntil - System.currentTimeMillis();
+            offender.muteUntil = 0;
+            save();
+        }
+    }
+
+    public synchronized boolean resume(UUID uuid) {
+        Offender offender = offenders.get(uuid);
+        if (offender == null) return false;
+        if (offender.pausedRemaining > 0) {
+            offender.muteUntil = System.currentTimeMillis() + offender.pausedRemaining;
+            offender.pausedRemaining = 0;
+            save();
+            return true;
+        }
+        return false;
+    }
+
+    public synchronized boolean isPaused(UUID uuid) {
+        Offender offender = offenders.get(uuid);
+        return offender != null && offender.pausedRemaining > 0;
     }
 
     public synchronized int offenceCount(UUID uuid, long windowMs) {
@@ -90,6 +122,7 @@ public class PunishmentStore {
 
     public static class Offender {
         public long muteUntil = 0;
+        public long pausedRemaining = 0;
         public List<Long> offences = new ArrayList<>();
     }
 }

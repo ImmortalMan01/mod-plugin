@@ -2,7 +2,6 @@ package me.ogulcan.chatmod.gui;
 
 import me.ogulcan.chatmod.Main;
 import me.ogulcan.chatmod.storage.PunishmentStore;
-import me.ogulcan.chatmod.task.UnmuteTask;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -197,16 +196,19 @@ public class DashboardGUI implements Listener {
                     case "add" -> {
                         long mins = store.remaining(selected) / 60000 + btn.value;
                         store.mute(selected, mins);
-                        new UnmuteTask(plugin, selected, store).runTaskLater(plugin, mins * 60L * 20L);
+                        plugin.scheduleUnmute(selected, mins * 60L * 20L);
                     }
                     case "subtract" -> {
                         long mins = Math.max(0, store.remaining(selected) / 60000 - btn.value);
                         if (mins == 0) store.unmute(selected); else {
                             store.mute(selected, mins);
-                            new UnmuteTask(plugin, selected, store).runTaskLater(plugin, mins * 60L * 20L);
+                            plugin.scheduleUnmute(selected, mins * 60L * 20L);
                         }
                     }
-                    case "unmute" -> store.unmute(selected);
+                    case "unmute" -> {
+                        store.unmute(selected);
+                        plugin.cancelUnmute(selected);
+                    }
                 }
             }
             openingNew = true;
