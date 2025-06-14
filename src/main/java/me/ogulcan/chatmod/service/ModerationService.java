@@ -16,6 +16,7 @@ import java.util.logging.Logger;
 
 public class ModerationService {
     private static final String URL = "https://api.openai.com/v1/moderations";
+    private static final String MODEL = "omni-moderation-latest";
     private final OkHttpClient client = new OkHttpClient();
     private final Gson gson = new Gson();
     private final String apiKey;
@@ -110,6 +111,7 @@ public class ModerationService {
     }
 
     private static class Payload {
+        final String model = MODEL;
         final String input;
         Payload(String input) { this.input = input; }
     }
