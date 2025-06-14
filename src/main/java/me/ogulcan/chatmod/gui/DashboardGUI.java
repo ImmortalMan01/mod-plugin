@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -79,7 +80,7 @@ public class DashboardGUI implements Listener {
     @EventHandler
     public void onClick(InventoryClickEvent e) {
         if (e.getWhoClicked() != viewer) return;
-        if (e.getInventory().equals(inventory)) {
+        if (e.getView().getTopInventory().equals(inventory) && e.getRawSlot() < inventory.getSize()) {
             e.setCancelled(true);
             int slot = e.getRawSlot();
             if (slot % 9 == 0 && slot / 9 <= 5) { // player column
@@ -137,6 +138,19 @@ public class DashboardGUI implements Listener {
         if (e.getPlayer() == viewer) {
             InventoryClickEvent.getHandlerList().unregister(this);
             InventoryCloseEvent.getHandlerList().unregister(this);
+        }
+    }
+
+    @EventHandler
+    public void onDrag(InventoryDragEvent e) {
+        if (e.getWhoClicked() != viewer) return;
+        if (e.getView().getTopInventory().equals(inventory)) {
+            for (int slot : e.getRawSlots()) {
+                if (slot < inventory.getSize()) {
+                    e.setCancelled(true);
+                    break;
+                }
+            }
         }
     }
 }
