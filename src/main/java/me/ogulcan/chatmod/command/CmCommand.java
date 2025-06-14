@@ -106,11 +106,11 @@ public class CmCommand implements CommandExecutor {
 
     private boolean gui(CommandSender sender) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage("Only players can use this command.");
+            sender.sendMessage(plugin.getMessages().get("only-players"));
             return true;
         }
         if (!player.hasPermission("chatmoderation.gui")) {
-            sender.sendMessage("No permission.");
+            sender.sendMessage(plugin.getMessages().get("no-permission"));
             return true;
         }
         new DashboardGUI(plugin, store, plugin.getGuiConfig(), player).open();
