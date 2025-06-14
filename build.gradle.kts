@@ -27,6 +27,5 @@ java {
 
 tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
     archiveClassifier.set("")
-    relocate("com.google.gson", "me.ogulcan.chatmod.libs.gson")
-    relocate("okhttp3", "me.ogulcan.chatmod.libs.okhttp3")
+    // Relocation removed due to ASM incompatibility with JDK 21
 }

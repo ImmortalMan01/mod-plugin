@@ -3,7 +3,7 @@
 A simple Paper/Spigot plugin that integrates with OpenAI Moderation API to automatically mute players for inappropriate chat messages. The plugin demonstrates asynchronous HTTP communication, rate limiting and basic punishment storage.
 
 ## Building
-If the Gradle wrapper JAR is missing, run `gradle wrapper` or use your system Gradle.
+Requires JDK 21. If the Gradle wrapper JAR is missing, run `gradle wrapper` or use your system Gradle.
 
 ```
 ./gradlew shadowJar
