@@ -37,7 +37,11 @@ public class Main extends JavaPlugin {
         String apiKey = getConfig().getString("openai-key", "");
         double threshold = getConfig().getDouble("threshold", 0.5);
         int rateLimit = getConfig().getInt("rate-limit", 60);
-        this.moderationService = new ModerationService(apiKey, threshold, rateLimit, this.getLogger());
+        boolean debug = getConfig().getBoolean("debug", false);
+        if (debug) {
+            getLogger().info("Debug mode enabled");
+        }
+        this.moderationService = new ModerationService(apiKey, threshold, rateLimit, this.getLogger(), debug);
         this.store = new PunishmentStore(new File(getDataFolder(), "data/punishments.json"));
         getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store), this);
 
