@@ -17,4 +17,10 @@ public class WordFilterTest {
         List<String> words = List.of("orospu", "piç");
         assertFalse(WordFilter.containsBlockedWord("Merhaba nasılsın", words));
     }
+
+    @Test
+    public void testNormalizationDetectsVariant() {
+        List<String> words = List.of("sikeyim");
+        assertTrue(WordFilter.containsBlockedWord("s\u0131key\u0131m", words));
+    }
 }
