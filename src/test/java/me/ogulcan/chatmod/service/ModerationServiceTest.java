@@ -73,6 +73,13 @@ public class ModerationServiceTest {
         assertFalse(r.triggered);
     }
 
+    @Test
+    public void testDisabledWhenNoApiKey() throws Exception {
+        ModerationService disabled = new ModerationService("", 0.5, 60, java.util.logging.Logger.getAnonymousLogger());
+        ModerationService.Result r = disabled.moderate("whatever").get();
+        assertFalse(r.triggered);
+    }
+
     private String response(boolean flagged, boolean blocked, double score) {
         return new Gson().toJson(Map.of("results", new Object[]{
                 Map.of(

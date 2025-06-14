@@ -22,7 +22,9 @@ gradle test
 ```
 
 ## Configuration
-The plugin generates `config.yml` on first run. Insert your OpenAI API key and adjust thresholds or punishments as needed.
+The plugin generates `config.yml` on first run. **You must replace** the `openai-key`
+value with your own API key or moderation requests will be skipped. Adjust
+thresholds or punishments as needed.
 Set `language` to `en` or `tr` to change plugin messages. The selected language file (`messages_en.yml` or `messages_tr.yml`) will be copied to the plugin folder so you can edit any text.
 The service now uses OpenAI's `omni-moderation-latest` model by default.
 All categories supported by this model are included in `blocked-categories`:
