@@ -2,9 +2,14 @@ package me.ogulcan.chatmod;
 
 import me.ogulcan.chatmod.command.CmCommand;
 import me.ogulcan.chatmod.listener.ChatListener;
+import me.ogulcan.chatmod.listener.PlayerListener;
 import me.ogulcan.chatmod.service.ModerationService;
 import me.ogulcan.chatmod.storage.PunishmentStore;
 import me.ogulcan.chatmod.util.Messages;
+import org.bukkit.scheduler.BukkitTask;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.UUID;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -17,6 +22,7 @@ public class Main extends JavaPlugin {
     private Messages messages;
     private FileConfiguration guiConfig;
     private boolean autoMute = true;
+    private final Map<UUID, BukkitTask> tasks = new HashMap<>();
 
     @Override
     public void onEnable() {
@@ -45,6 +51,7 @@ public class Main extends JavaPlugin {
         this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug);
         this.store = new PunishmentStore(new File(getDataFolder(), "data/punishments.json"));
         getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store), this);
+        getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
 
         getCommand("cm").setExecutor(new CmCommand(this, store));
     }
@@ -81,5 +88,18 @@ public class Main extends JavaPlugin {
 
     public void setAutoMute(boolean autoMute) {
         this.autoMute = autoMute;
+    }
+
+    public void scheduleUnmute(UUID uuid, long delayTicks) {
+        BukkitTask existing = tasks.remove(uuid);
+        if (existing != null) existing.cancel();
+        BukkitTask task = new me.ogulcan.chatmod.task.UnmuteTask(this, uuid, store)
+                .runTaskLater(this, delayTicks);
+        tasks.put(uuid, task);
+    }
+
+    public void cancelUnmute(UUID uuid) {
+        BukkitTask task = tasks.remove(uuid);
+        if (task != null) task.cancel();
     }
 }

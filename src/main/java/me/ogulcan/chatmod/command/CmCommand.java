@@ -3,7 +3,6 @@ package me.ogulcan.chatmod.command;
 import me.ogulcan.chatmod.Main;
 import me.ogulcan.chatmod.gui.DashboardGUI;
 import me.ogulcan.chatmod.storage.PunishmentStore;
-import me.ogulcan.chatmod.task.UnmuteTask;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -65,7 +64,7 @@ public class CmCommand implements CommandExecutor {
             return true;
         }
         store.mute(target.getUniqueId(), minutes);
-        new UnmuteTask(plugin, target.getUniqueId(), store).runTaskLater(plugin, minutes * 60L * 20L);
+        plugin.scheduleUnmute(target.getUniqueId(), minutes * 60L * 20L);
         sender.sendMessage(plugin.getMessages().get("muted", target.getName(), minutes));
         return true;
     }
@@ -78,6 +77,7 @@ public class CmCommand implements CommandExecutor {
             return true;
         }
         store.unmute(target.getUniqueId());
+        plugin.cancelUnmute(target.getUniqueId());
         sender.sendMessage(plugin.getMessages().get("unmuted", target.getName()));
         return true;
     }

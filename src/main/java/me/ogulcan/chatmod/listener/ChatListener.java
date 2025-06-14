@@ -4,7 +4,6 @@ import me.ogulcan.chatmod.Main;
 import me.ogulcan.chatmod.service.ModerationService;
 import me.ogulcan.chatmod.service.WordFilter;
 import me.ogulcan.chatmod.storage.PunishmentStore;
-import me.ogulcan.chatmod.task.UnmuteTask;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -75,7 +74,7 @@ public class ChatListener implements Listener {
                     .forEach(p -> p.sendMessage(msg));
         }
         store.mute(uuid, minutes);
-        new UnmuteTask(plugin, uuid, store).runTaskLater(plugin, minutes * 60L * 20L);
+        plugin.scheduleUnmute(uuid, minutes * 60L * 20L);
         player.sendMessage(plugin.getMessages().get("muted-player", minutes));
 
         // Broadcast mute information to all players

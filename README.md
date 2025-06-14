@@ -27,6 +27,7 @@ value with your own API key or moderation requests will be skipped. Adjust
 thresholds or punishments as needed.
 Set `language` to `en` or `tr` to change plugin messages. The selected language file (`messages_en.yml` or `messages_tr.yml`) will be copied to the plugin folder so you can edit any text.
 Enable `debug: true` in `config.yml` to log moderation responses and the selected moderation model for troubleshooting.
+Set `countdown-offline` to `false` if you want mute timers to pause while muted players are offline.
 The `model` option defaults to OpenAI's `omni-moderation-latest`, but you may set it to any supported model.
 All categories supported by this model are included in `blocked-categories`:
 
