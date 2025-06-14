@@ -35,6 +35,7 @@ public class ChatListener implements Listener {
 
     @EventHandler
     public void onChat(AsyncPlayerChatEvent event) {
+        if (!plugin.isAutoMute()) return;
         Player player = event.getPlayer();
         UUID uuid = player.getUniqueId();
         if (store.isMuted(uuid)) {

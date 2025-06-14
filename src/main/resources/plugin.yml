@@ -13,3 +13,9 @@ permissions:
   chatmoderation.notify:
     description: Receive moderation notifications
     default: op
+  chatmoderation.gui:
+    description: Open the moderation GUI
+    default: op
+  chatmoderation.admin:
+    description: Perform admin actions in the GUI
+    default: op

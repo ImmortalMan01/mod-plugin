@@ -65,6 +65,12 @@ public class PunishmentStore {
         return offender.offences.size();
     }
 
+    /** Clears all stored offences and mute timers. */
+    public synchronized void clear() {
+        offenders.clear();
+        save();
+    }
+
     private void load() {
         if (!file.exists()) return;
         try (FileReader reader = new FileReader(file)) {

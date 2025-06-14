@@ -1,6 +1,7 @@
 package me.ogulcan.chatmod.command;
 
 import me.ogulcan.chatmod.Main;
+import me.ogulcan.chatmod.gui.DashboardGUI;
 import me.ogulcan.chatmod.storage.PunishmentStore;
 import me.ogulcan.chatmod.task.UnmuteTask;
 import org.bukkit.Bukkit;
@@ -28,6 +29,7 @@ public class CmCommand implements CommandExecutor {
             sender.sendMessage(plugin.getMessages().get("command-unmute"));
             sender.sendMessage(plugin.getMessages().get("command-status"));
             sender.sendMessage(plugin.getMessages().get("command-reload"));
+            sender.sendMessage(plugin.getMessages().get("command-gui"));
             return true;
         }
         String sub = args[0].toLowerCase();
@@ -41,6 +43,8 @@ public class CmCommand implements CommandExecutor {
                 return status(sender, subArgs);
             case "reload":
                 return reload(sender);
+            case "gui":
+                return gui(sender);
             default:
                 return false;
         }
@@ -97,6 +101,19 @@ public class CmCommand implements CommandExecutor {
     private boolean reload(CommandSender sender) {
         plugin.reloadFiles();
         sender.sendMessage(plugin.getMessages().get("reloaded"));
+        return true;
+    }
+
+    private boolean gui(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage("Only players can use this command.");
+            return true;
+        }
+        if (!player.hasPermission("chatmoderation.gui")) {
+            sender.sendMessage("No permission.");
+            return true;
+        }
+        new DashboardGUI(plugin, store, player).open();
         return true;
     }
 }

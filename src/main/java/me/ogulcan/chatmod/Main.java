@@ -13,6 +13,7 @@ public class Main extends JavaPlugin {
     private ModerationService moderationService;
     private PunishmentStore store;
     private Messages messages;
+    private boolean autoMute = true;
 
     @Override
     public void onEnable() {
@@ -41,5 +42,13 @@ public class Main extends JavaPlugin {
         reloadConfig();
         String lang = getConfig().getString("language", "en");
         this.messages = new Messages(this, lang);
+    }
+
+    public boolean isAutoMute() {
+        return autoMute;
+    }
+
+    public void setAutoMute(boolean autoMute) {
+        this.autoMute = autoMute;
     }
 }
