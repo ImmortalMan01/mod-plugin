@@ -94,6 +94,10 @@ public class ChatListener implements Listener {
     private String format(long seconds) {
         long min = seconds / 60;
         long sec = seconds % 60;
-        return min + "m" + sec + "s";
+        String lang = plugin.getConfig().getString("language", "en");
+        if ("tr".equalsIgnoreCase(lang)) {
+            return min + " dakika " + sec + " saniye";
+        }
+        return min + "m " + sec + "s";
     }
 }
