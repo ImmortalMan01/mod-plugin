@@ -21,7 +21,7 @@ public class Main extends JavaPlugin {
     public void onEnable() {
         saveDefaultConfig();
         String lang = getConfig().getString("language", "en");
-        this.messages = new Messages(lang);
+        this.messages = new Messages(this, lang);
         String apiKey = getConfig().getString("openai-key", "");
         double threshold = getConfig().getDouble("threshold", 0.5);
         int rateLimit = getConfig().getInt("rate-limit", 60);
