@@ -27,6 +27,7 @@ public class CmCommand implements CommandExecutor {
             sender.sendMessage(plugin.getMessages().get("command-mute"));
             sender.sendMessage(plugin.getMessages().get("command-unmute"));
             sender.sendMessage(plugin.getMessages().get("command-status"));
+            sender.sendMessage(plugin.getMessages().get("command-reload"));
             return true;
         }
         String sub = args[0].toLowerCase();
@@ -38,6 +39,8 @@ public class CmCommand implements CommandExecutor {
                 return unmute(sender, subArgs);
             case "status":
                 return status(sender, subArgs);
+            case "reload":
+                return reload(sender);
             default:
                 return false;
         }
@@ -88,6 +91,12 @@ public class CmCommand implements CommandExecutor {
         } else {
             sender.sendMessage(plugin.getMessages().get("not-muted", target.getName()));
         }
+        return true;
+    }
+
+    private boolean reload(CommandSender sender) {
+        plugin.reloadFiles();
+        sender.sendMessage(plugin.getMessages().get("reloaded"));
         return true;
     }
 }

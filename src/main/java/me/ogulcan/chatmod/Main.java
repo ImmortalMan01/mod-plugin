@@ -36,4 +36,10 @@ public class Main extends JavaPlugin {
     public Messages getMessages() {
         return messages;
     }
+
+    public void reloadFiles() {
+        reloadConfig();
+        String lang = getConfig().getString("language", "en");
+        this.messages = new Messages(this, lang);
+    }
 }
