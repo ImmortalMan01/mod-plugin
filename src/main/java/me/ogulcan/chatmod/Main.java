@@ -3,9 +3,11 @@ package me.ogulcan.chatmod;
 import me.ogulcan.chatmod.command.CMuteCommand;
 import me.ogulcan.chatmod.command.CStatusCommand;
 import me.ogulcan.chatmod.command.CUnmuteCommand;
+import me.ogulcan.chatmod.command.CmCommand;
 import me.ogulcan.chatmod.listener.ChatListener;
 import me.ogulcan.chatmod.service.ModerationService;
 import me.ogulcan.chatmod.storage.PunishmentStore;
+import me.ogulcan.chatmod.util.Messages;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
@@ -13,10 +15,13 @@ import java.io.File;
 public class Main extends JavaPlugin {
     private ModerationService moderationService;
     private PunishmentStore store;
+    private Messages messages;
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
+        String lang = getConfig().getString("language", "en");
+        this.messages = new Messages(lang);
         String apiKey = getConfig().getString("openai-key", "");
         double threshold = getConfig().getDouble("threshold", 0.5);
         int rateLimit = getConfig().getInt("rate-limit", 60);
@@ -26,10 +31,15 @@ public class Main extends JavaPlugin {
 
         getCommand("cmute").setExecutor(new CMuteCommand(store, this));
         getCommand("cunmute").setExecutor(new CUnmuteCommand(store, this));
-        getCommand("cstatus").setExecutor(new CStatusCommand(store));
+        getCommand("cstatus").setExecutor(new CStatusCommand(store, this));
+        getCommand("cm").setExecutor(new CmCommand(this));
     }
 
     public PunishmentStore getStore() {
         return store;
+    }
+
+    public Messages getMessages() {
+        return messages;
     }
 }
