@@ -24,6 +24,7 @@ public class ModerationService {
     private final int rateLimit;
     private final Logger logger;
     private final boolean enabled;
+    private final boolean debug;
     private Instant window = Instant.now();
     private int count = 0;
 
@@ -31,11 +32,12 @@ public class ModerationService {
         return URL;
     }
 
-    public ModerationService(String apiKey, double threshold, int rateLimit, Logger logger) {
+    public ModerationService(String apiKey, double threshold, int rateLimit, Logger logger, boolean debug) {
         this.apiKey = apiKey;
         this.threshold = threshold;
         this.rateLimit = rateLimit;
         this.logger = logger;
+        this.debug = debug;
         this.enabled = apiKey != null && !apiKey.isBlank() && !"REPLACE_ME".equals(apiKey);
         if (!enabled) {
             logger.warning("OpenAI API key missing or not set. Moderation requests will be skipped.");
@@ -63,6 +65,9 @@ public class ModerationService {
             future.complete(new Result(false, false, new HashMap<>()));
             return future;
         }
+        if (debug) {
+            logger.info("Moderating message: " + message);
+        }
         client.dispatcher().executorService().execute(() -> sendRequest(message, future, 0));
         return future;
     }
@@ -78,6 +83,9 @@ public class ModerationService {
             @Override
             public void onFailure(Call call, IOException e) {
                 logger.log(Level.WARNING, "Moderation request failed", e);
+                if (debug) {
+                    logger.info("Retrying in debug mode, attempt " + attempt);
+                }
                 if (attempt < 2) {
                     CompletableFuture.delayedExecutor(1L << attempt, java.util.concurrent.TimeUnit.SECONDS, client.dispatcher().executorService())
                             .execute(() -> sendRequest(message, future, attempt + 1));
@@ -96,10 +104,16 @@ public class ModerationService {
                             return;
                         }
                         logger.warning("OpenAI error: " + response.code());
+                        if (debug) {
+                            logger.info("Response body: " + (rb != null ? rb.string() : "null"));
+                        }
                         future.complete(new Result(false, false, new HashMap<>()));
                         return;
                     }
                     String json = rb.string();
+                    if (debug) {
+                        logger.info("OpenAI response: " + json);
+                    }
                     ModerationResponse mr = gson.fromJson(json, ModerationResponse.class);
                     if (mr.results == null || mr.results.length == 0) {
                         future.complete(new Result(false, false, new HashMap<>()));
@@ -112,6 +126,9 @@ public class ModerationService {
                         if (scores.get(cat) >= threshold) {
                             trigger = true;
                         }
+                    }
+                    if (debug) {
+                        logger.info("Trigger: " + trigger + ", blocked: " + r.blocked + ", scores: " + scores);
                     }
                     future.complete(new Result(trigger, r.blocked, scores));
                 }

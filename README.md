@@ -26,6 +26,7 @@ The plugin generates `config.yml` on first run. **You must replace** the `openai
 value with your own API key or moderation requests will be skipped. Adjust
 thresholds or punishments as needed.
 Set `language` to `en` or `tr` to change plugin messages. The selected language file (`messages_en.yml` or `messages_tr.yml`) will be copied to the plugin folder so you can edit any text.
+Enable `debug: true` in `config.yml` to log moderation responses for troubleshooting.
 The service now uses OpenAI's `omni-moderation-latest` model by default.
 All categories supported by this model are included in `blocked-categories`:
 
