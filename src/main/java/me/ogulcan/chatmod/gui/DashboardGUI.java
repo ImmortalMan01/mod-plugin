@@ -20,6 +20,8 @@ import org.bukkit.inventory.meta.SkullMeta;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.time.Duration;
+
 import java.util.*;
 
 /**
@@ -72,6 +74,18 @@ public class DashboardGUI implements Listener {
             meta.setOwningPlayer(p);
             ChatColor color = store.isMuted(p.getUniqueId()) ? ChatColor.RED : ChatColor.GREEN;
             meta.setDisplayName(color + p.getName());
+
+            List<String> lore = new ArrayList<>();
+            if (store.isMuted(p.getUniqueId())) {
+                long rem = store.remaining(p.getUniqueId()) / 1000;
+                lore.add(plugin.getMessages().get("player-lore-muted", rem / 60, rem % 60));
+            } else {
+                lore.add(plugin.getMessages().get("player-lore-unmuted"));
+            }
+            int offences = store.offenceCount(p.getUniqueId(), Duration.ofHours(24).toMillis());
+            lore.add(plugin.getMessages().get("player-lore-offences", offences));
+            meta.setLore(lore);
+
             head.setItemMeta(meta);
             inventory.setItem(slot, head);
         }
