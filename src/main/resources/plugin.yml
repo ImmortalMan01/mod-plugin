@@ -4,12 +4,6 @@ main: me.ogulcan.chatmod.Main
 author: ogulcan
 api-version: "1.21"
 commands:
-  cmute:
-    permission: chatmoderation.command
-  cunmute:
-    permission: chatmoderation.command
-  cstatus:
-    permission: chatmoderation.command
   cm:
     permission: chatmoderation.command
 permissions:
