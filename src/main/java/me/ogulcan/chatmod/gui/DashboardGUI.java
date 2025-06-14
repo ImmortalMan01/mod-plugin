@@ -15,7 +15,6 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.inventory.meta.SkullMeta;
-import org.bukkit.profile.PlayerProfile;
 
 import java.util.UUID;
 
@@ -44,8 +43,8 @@ public class DashboardGUI implements Listener {
             if (index > 5) break;
             ItemStack head = new ItemStack(Material.PLAYER_HEAD);
             SkullMeta meta = (SkullMeta) head.getItemMeta();
-            PlayerProfile profile = p.getPlayerProfile();
-            meta.setOwnerProfile(profile);
+            // Use legacy API to support both Paper and Spigot
+            meta.setOwningPlayer(p);
             ChatColor color = store.isMuted(p.getUniqueId()) ? ChatColor.RED : ChatColor.GREEN;
             meta.setDisplayName(color + p.getName());
             head.setItemMeta(meta);
