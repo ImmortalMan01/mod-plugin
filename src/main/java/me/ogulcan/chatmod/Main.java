@@ -3,6 +3,7 @@ package me.ogulcan.chatmod;
 import me.ogulcan.chatmod.command.CmCommand;
 import me.ogulcan.chatmod.listener.ChatListener;
 import me.ogulcan.chatmod.listener.PlayerListener;
+import me.ogulcan.chatmod.listener.PrivateMessageListener;
 import me.ogulcan.chatmod.service.ModerationService;
 import me.ogulcan.chatmod.storage.PunishmentStore;
 import me.ogulcan.chatmod.util.Messages;
@@ -52,6 +53,7 @@ public class Main extends JavaPlugin {
         this.store = new PunishmentStore(new File(getDataFolder(), "data/punishments.json"));
         getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
+        getServer().getPluginManager().registerEvents(new PrivateMessageListener(this, store), this);
 
         getCommand("cm").setExecutor(new CmCommand(this, store));
     }
