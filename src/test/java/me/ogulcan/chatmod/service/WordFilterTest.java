@@ -23,4 +23,16 @@ public class WordFilterTest {
         List<String> words = List.of("sikeyim");
         assertTrue(WordFilter.containsBlockedWord("s\u0131key\u0131m", words));
     }
+
+    @Test
+    public void testDetectsWordWithSpaces() {
+        List<String> words = List.of("sikeyim");
+        assertTrue(WordFilter.containsBlockedWord("s i k e y i m", words));
+    }
+
+    @Test
+    public void testDetectsWordWithSpecialChars() {
+        List<String> words = List.of("sikeyim");
+        assertTrue(WordFilter.containsBlockedWord("s*i+k(e)y!i%m", words));
+    }
 }

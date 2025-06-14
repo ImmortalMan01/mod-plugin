@@ -8,11 +8,12 @@ import java.util.regex.Pattern;
 public class WordFilter {
 
     private static final Pattern DIACRITICS = Pattern.compile("\\p{M}");
+    private static final Pattern NON_ALNUM = Pattern.compile("[^\\p{L}\\p{Nd}]");
 
     /**
      * Normalize text by converting to lowercase, replacing common Turkish
-     * characters with their ASCII equivalents and stripping any remaining
-     * diacritics.
+     * characters with their ASCII equivalents, stripping any remaining
+     * diacritics and removing whitespace or punctuation.
      */
     private static String normalize(String text) {
         if (text == null) return "";
@@ -24,7 +25,8 @@ public class WordFilter {
                 .replace('ç', 'c')
                 .replace('ı', 'i');
         String nfd = Normalizer.normalize(lower, Normalizer.Form.NFD);
-        return DIACRITICS.matcher(nfd).replaceAll("");
+        String withoutDiacritics = DIACRITICS.matcher(nfd).replaceAll("");
+        return NON_ALNUM.matcher(withoutDiacritics).replaceAll("");
     }
 
     public static boolean containsBlockedWord(String message, List<String> blockedWords) {
