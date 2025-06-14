@@ -11,6 +11,7 @@ blocked-categories:
   - hate
   - sexual
 rate-limit: 60
+use-blocked-words: true
 blocked-words:
   - amk
   - orospu

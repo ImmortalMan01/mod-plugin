@@ -23,6 +23,7 @@ public class ChatListener implements Listener {
     private final PunishmentStore store;
     private final List<String> categories;
     private final List<String> words;
+    private final boolean useBlockedWords;
 
     public ChatListener(Main plugin, ModerationService service, PunishmentStore store) {
         this.plugin = plugin;
@@ -30,6 +31,7 @@ public class ChatListener implements Listener {
         this.store = store;
         this.categories = plugin.getConfig().getStringList("blocked-categories");
         this.words = plugin.getConfig().getStringList("blocked-words");
+        this.useBlockedWords = plugin.getConfig().getBoolean("use-blocked-words", true);
     }
 
     @EventHandler
@@ -43,7 +45,7 @@ public class ChatListener implements Listener {
             return;
         }
         String message = event.getMessage();
-        if (WordFilter.containsBlockedWord(message, words)) {
+        if (useBlockedWords && WordFilter.containsBlockedWord(message, words)) {
             Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player));
             return;
         }
