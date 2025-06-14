@@ -8,12 +8,15 @@ import java.util.regex.Pattern;
 public class WordFilter {
 
     private static final Pattern DIACRITICS = Pattern.compile("\\p{M}");
-    private static final Pattern NON_ALNUM = Pattern.compile("[^\\p{L}\\p{Nd}]");
+    // Replace punctuation with spaces but keep letters, digits and whitespace
+    private static final Pattern PUNCT = Pattern.compile("[^\\p{L}\\p{Nd}\\s]");
+    private static final Pattern WHITESPACE = Pattern.compile("\\s+");
 
     /**
      * Normalize text by converting to lowercase, replacing common Turkish
      * characters with their ASCII equivalents, stripping any remaining
-     * diacritics and removing whitespace or punctuation.
+     * diacritics and converting punctuation to spaces. Multiple spaces are
+     * collapsed to a single space and the result is trimmed.
      */
     private static String normalize(String text) {
         if (text == null) return "";
@@ -26,15 +29,36 @@ public class WordFilter {
                 .replace('ı', 'i');
         String nfd = Normalizer.normalize(lower, Normalizer.Form.NFD);
         String withoutDiacritics = DIACRITICS.matcher(nfd).replaceAll("");
-        return NON_ALNUM.matcher(withoutDiacritics).replaceAll("");
+        String withSpaces = PUNCT.matcher(withoutDiacritics).replaceAll(" ");
+        return WHITESPACE.matcher(withSpaces).replaceAll(" ").trim();
     }
 
     public static boolean containsBlockedWord(String message, List<String> blockedWords) {
         if (message == null) return false;
         String normalizedMessage = normalize(message);
-        for (String w : blockedWords) {
-            if (normalizedMessage.contains(normalize(w))) {
-                return true;
+        String[] tokens = normalizedMessage.split(" ");
+
+        // Merge consecutive single-character tokens so "s i k" becomes "sik"
+        List<String> words = new java.util.ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        for (String t : tokens) {
+            if (t.length() <= 1) {
+                sb.append(t);
+            } else {
+                if (sb.length() > 0) {
+                    words.add(sb.toString());
+                    sb.setLength(0);
+                }
+                words.add(t);
+            }
+        }
+        if (sb.length() > 0) words.add(sb.toString());
+
+        for (String token : words) {
+            for (String w : blockedWords) {
+                if (token.contains(normalize(w))) {
+                    return true;
+                }
             }
         }
         return false;
