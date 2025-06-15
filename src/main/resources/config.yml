@@ -1,5 +1,6 @@
 openai-key: "REPLACE_ME"
 language: en
+# Set to `gpt-4.1-mini` to use the chat model with a profanity check prompt
 model: omni-moderation-latest
 threshold: 0.5
 punishments:

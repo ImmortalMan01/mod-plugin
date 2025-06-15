@@ -24,6 +24,8 @@ public class ModerationServiceTest {
         service = new ModerationService("test", "omni-moderation-latest", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false) {
             @Override
             protected String getUrl() { return server.url("/v1/moderations").toString(); }
+            @Override
+            protected String getChatUrl() { return server.url("/v1/chat/completions").toString(); }
         };
     }
 
@@ -85,6 +87,34 @@ public class ModerationServiceTest {
         ModerationService disabled = new ModerationService("", "omni-moderation-latest", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false);
         ModerationService.Result r = disabled.moderate("whatever").get();
         assertFalse(r.triggered);
+    }
+
+    @Test
+    public void testChatModelTriggered() throws Exception {
+        service = new ModerationService("test", "gpt-4.1-mini", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false) {
+            @Override
+            protected String getChatUrl() { return server.url("/v1/chat/completions").toString(); }
+        };
+        server.enqueue(new MockResponse().setBody(chatResponse("var")));
+        ModerationService.Result r = service.moderate("bad").get();
+        assertTrue(r.triggered);
+    }
+
+    @Test
+    public void testChatModelNotTriggered() throws Exception {
+        service = new ModerationService("test", "gpt-4.1-mini", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false) {
+            @Override
+            protected String getChatUrl() { return server.url("/v1/chat/completions").toString(); }
+        };
+        server.enqueue(new MockResponse().setBody(chatResponse("yok")));
+        ModerationService.Result r = service.moderate("ok").get();
+        assertFalse(r.triggered);
+    }
+
+    private String chatResponse(String text) {
+        return new Gson().toJson(Map.of("choices", new Object[]{
+                Map.of("message", Map.of("content", text))
+        }));
     }
 
     private String response(boolean flagged, boolean blocked, double score) {
