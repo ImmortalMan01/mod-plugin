@@ -91,7 +91,7 @@ main:
       action: toggle-automute
     logs:
       slot: 35
-      material: BOOK_AND_QUILL
+      material: WRITABLE_BOOK
       name: "&eView Logs"
       action: logs
 player:

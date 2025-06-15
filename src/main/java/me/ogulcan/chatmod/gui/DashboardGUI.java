@@ -94,7 +94,9 @@ public class DashboardGUI implements Listener {
         if (buttons != null) {
             for (String key : buttons.getKeys(false)) {
                 int slot = buttons.getInt(key + ".slot");
-                Material mat = Material.valueOf(buttons.getString(key + ".material", "STONE"));
+                String matName = buttons.getString(key + ".material", "STONE");
+                Material mat = Material.matchMaterial(matName);
+                if (mat == null) mat = Material.STONE;
                 String action = buttons.getString(key + ".action", "");
                 String name;
                 if ("toggle-automute".equals(action)) {
@@ -119,7 +121,9 @@ public class DashboardGUI implements Listener {
         if (buttons != null) {
             for (String key : buttons.getKeys(false)) {
                 int slot = buttons.getInt(key + ".slot");
-                Material mat = Material.valueOf(buttons.getString(key + ".material", "STONE"));
+                String matName = buttons.getString(key + ".material", "STONE");
+                Material mat = Material.matchMaterial(matName);
+                if (mat == null) mat = Material.STONE;
                 String name = ChatColor.translateAlternateColorCodes('&', buttons.getString(key + ".name", key));
                 String action = buttons.getString(key + ".action", "");
                 int value = buttons.getInt(key + ".value", 0);
