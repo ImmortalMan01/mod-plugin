@@ -24,48 +24,48 @@ blocked-categories:
 category-settings:
   harassment:
     enabled: true
-    ratio: 0.5
+    ratio: 0.06
   harassment/threatening:
     enabled: true
-    ratio: 0.5
+    ratio: 0.06
   hate:
     enabled: true
-    ratio: 0.5
+    ratio: 0.06
   hate/threatening:
     enabled: true
-    ratio: 0.5
+    ratio: 0.06
   illicit:
-    enabled: true
+    enabled: false
     ratio: 0.5
   illicit/violent:
-    enabled: true
+    enabled: false
     ratio: 0.5
   self-harm:
-    enabled: true
+    enabled: false
     ratio: 0.5
   self-harm/intent:
-    enabled: true
+    enabled: false
     ratio: 0.5
   self-harm/instructions:
-    enabled: true
+    enabled: false
     ratio: 0.5
   sexual:
     enabled: true
-    ratio: 0.5
+    ratio: 0.03
   sexual/minors:
     enabled: true
-    ratio: 0.5
+    ratio: 0.03
   violence:
-    enabled: true
-    ratio: 0.5
+    enabled: false
+    ratio: 0.05
   violence/graphic:
-    enabled: true
-    ratio: 0.5
+    enabled: false
+    ratio: 0.05
 rate-limit: 250
 debug: false
 countdown-offline: true
 use-blocked-categories: true
-use-blocked-words: true
+use-blocked-words: false
 blocked-words:
   - amk
   - orospu
