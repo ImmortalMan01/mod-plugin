@@ -2,6 +2,7 @@ package me.ogulcan.chatmod.gui;
 
 import me.ogulcan.chatmod.Main;
 import me.ogulcan.chatmod.storage.PunishmentStore;
+import me.ogulcan.chatmod.gui.LogsGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -159,8 +160,16 @@ public class DashboardGUI implements Listener {
                 }
             } else {
                 ButtonInfo btn = mainButtons.get(slot);
-                if (btn != null && viewer.hasPermission("chatmoderation.admin")) {
-                    switch (btn.action) {
+                if (btn != null) {
+                    if ("logs".equals(btn.action)) {
+                        if (viewer.hasPermission("chatmoderation.logs")) {
+                            openingNew = true;
+                            new LogsGUI(plugin, plugin.getLogStore(), viewer);
+                        } else {
+                            viewer.sendMessage(plugin.getMessages().get("no-permission"));
+                        }
+                    } else if (viewer.hasPermission("chatmoderation.admin")) {
+                        switch (btn.action) {
                         case "reload" -> {
                             plugin.reloadFiles();
                             this.gui = plugin.getGuiConfig();
@@ -181,6 +190,7 @@ public class DashboardGUI implements Listener {
                             createMain();
                             openingNew = true;
                             viewer.openInventory(inventory);
+                        }
                         }
                     }
                 }
