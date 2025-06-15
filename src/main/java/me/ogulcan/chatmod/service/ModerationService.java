@@ -16,7 +16,10 @@ import java.util.logging.Logger;
 
 public class ModerationService {
     private static final String URL = "https://api.openai.com/v1/moderations";
+    private static final String CHAT_URL = "https://api.openai.com/v1/chat/completions";
     private static final String DEFAULT_MODEL = "omni-moderation-latest";
+    private static final String SYSTEM_PROMPT =
+            "Bu c\u00fcmlede k\u00fcf\u00fcr veya hakaret varsa sadece var yoksa yok yaz (kullan\u0131c\u0131 k\u00fcf\u00fcr\u00fc gizmelek i\u00e7in \u00f6zel karakrerler veya sans\u00fcrler kullanm\u0131\u015f olabilir dikkat et):";
     private final OkHttpClient client = new OkHttpClient();
     private final Gson gson = new Gson();
     private final String apiKey;
@@ -24,6 +27,7 @@ public class ModerationService {
     private final int rateLimit;
     private final Logger logger;
     private final String model;
+    private final boolean chatModel;
     private final boolean enabled;
     private final boolean debug;
     private Instant window = Instant.now();
@@ -33,9 +37,14 @@ public class ModerationService {
         return URL;
     }
 
+    protected String getChatUrl() {
+        return CHAT_URL;
+    }
+
     public ModerationService(String apiKey, String model, double threshold, int rateLimit, Logger logger, boolean debug) {
         this.apiKey = apiKey;
         this.model = (model == null || model.isBlank()) ? DEFAULT_MODEL : model;
+        this.chatModel = "gpt-4.1-mini".equalsIgnoreCase(this.model);
         this.threshold = threshold;
         this.rateLimit = rateLimit;
         this.logger = logger;
@@ -45,7 +54,11 @@ public class ModerationService {
             logger.warning("OpenAI API key missing or not set. Moderation requests will be skipped.");
         }
         if (debug) {
-            logger.info("Using moderation model: " + this.model);
+            if (chatModel) {
+                logger.info("Using chat model: " + this.model);
+            } else {
+                logger.info("Using moderation model: " + this.model);
+            }
         }
     }
 
@@ -73,7 +86,11 @@ public class ModerationService {
         if (debug) {
             logger.info("Moderating message: " + message);
         }
-        client.dispatcher().executorService().execute(() -> sendRequest(message, future, 0));
+        if (chatModel) {
+            client.dispatcher().executorService().execute(() -> sendChatRequest(message, future, 0));
+        } else {
+            client.dispatcher().executorService().execute(() -> sendRequest(message, future, 0));
+        }
         return future;
     }
 
@@ -142,10 +159,94 @@ public class ModerationService {
         });
     }
 
+    private void sendChatRequest(String message, CompletableFuture<Result> future, int attempt) {
+        RequestBody body = RequestBody.create(gson.toJson(new ChatPayload(message)), MediaType.parse("application/json"));
+        Request request = new Request.Builder()
+                .url(getChatUrl())
+                .post(body)
+                .header("Authorization", "Bearer " + apiKey)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                if (debug) {
+                    logger.log(Level.WARNING, "Chat request failed", e);
+                    logger.info("Retrying in debug mode, attempt " + attempt);
+                }
+                if (attempt < 2) {
+                    CompletableFuture.delayedExecutor(1L << attempt, java.util.concurrent.TimeUnit.SECONDS, client.dispatcher().executorService())
+                            .execute(() -> sendChatRequest(message, future, attempt + 1));
+                } else {
+                    future.complete(new Result(false, false, new HashMap<>()));
+                }
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                try (ResponseBody rb = response.body()) {
+                    if (!response.isSuccessful()) {
+                        if ((response.code() == 429 || response.code() >= 500) && attempt < 2) {
+                            CompletableFuture.delayedExecutor(1L << attempt, java.util.concurrent.TimeUnit.SECONDS, client.dispatcher().executorService())
+                                    .execute(() -> sendChatRequest(message, future, attempt + 1));
+                            return;
+                        }
+                        if (debug) {
+                            logger.warning("OpenAI error: " + response.code());
+                            logger.info("Response body: " + (rb != null ? rb.string() : "null"));
+                        }
+                        future.complete(new Result(false, false, new HashMap<>()));
+                        return;
+                    }
+                    String json = rb.string();
+                    if (debug) {
+                        logger.info("OpenAI response: " + json);
+                    }
+                    ChatResponse cr = gson.fromJson(json, ChatResponse.class);
+                    if (cr.choices == null || cr.choices.length == 0 || cr.choices[0].message == null) {
+                        future.complete(new Result(false, false, new HashMap<>()));
+                        return;
+                    }
+                    String content = cr.choices[0].message.content == null ? "" : cr.choices[0].message.content.trim().toLowerCase();
+                    boolean trigger = content.startsWith("var");
+                    future.complete(new Result(trigger, trigger, new HashMap<>()));
+                }
+            }
+        });
+    }
+
     private class Payload {
         final String model = ModerationService.this.model;
         final String input;
         Payload(String input) { this.input = input; }
+    }
+
+    private class ChatPayload {
+        final String model = ModerationService.this.model;
+        final Message[] messages;
+        final double temperature = 0;
+        final int max_tokens = 1;
+        ChatPayload(String input) {
+            this.messages = new Message[]{
+                    new Message("system", SYSTEM_PROMPT),
+                    new Message("user", input)
+            };
+        }
+    }
+
+    private static class Message {
+        final String role;
+        final String content;
+        Message(String role, String content) {
+            this.role = role;
+            this.content = content;
+        }
+    }
+
+    private static class ChatResponse {
+        Choice[] choices;
+        static class Choice {
+            Message message;
+        }
     }
 
     private static class ModerationResponse {
