@@ -12,6 +12,7 @@ import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.configuration.ConfigurationSection;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.Locale;
 
 import java.time.Duration;
 import java.util.List;
@@ -40,7 +41,7 @@ public class ChatListener implements Listener {
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("category-thresholds");
         if (section != null) {
             for (String key : section.getKeys(false)) {
-                this.categoryThresholds.put(key, section.getDouble(key));
+                this.categoryThresholds.put(key.toLowerCase(Locale.ROOT), section.getDouble(key));
             }
         }
     }
@@ -65,7 +66,7 @@ public class ChatListener implements Listener {
             boolean catThresholdTrigger = false;
             if (useCategoryThresholds) {
                 for (Map.Entry<String, Double> e : result.scores.entrySet()) {
-                    Double th = categoryThresholds.get(e.getKey());
+                    Double th = categoryThresholds.get(e.getKey().toLowerCase(Locale.ROOT));
                     if (th != null && e.getValue() >= th) {
                         catThresholdTrigger = true;
                         break;
