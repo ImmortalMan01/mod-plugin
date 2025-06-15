@@ -3,7 +3,34 @@ language: en
 # Set to `gpt-4.1-mini` to use the chat model with a profanity check prompt
 model: omni-moderation-latest
 # Prompt used by the chat model
-chat-prompt: "Bu cümlede küfür veya hakaret varsa sadece var yoksa yok yaz (kullanıcı küfürü gizmelek için özel karakrerler veya sansürler kullanmış olabilir dikkat et):"
+chat-prompt: |-
+  • Bir Minecraft sunucusu sohbetindeki TEK bir mesajı denetleyeceksin.
+  • İstediğimiz tek çıktı: **VAR** (kural ihlali var) veya **YOK** (kural ihlali yok).
+  • Ek açıklama YALNIZCA “VAR” çıktığında, kısa ve öz bir sebep olarak verilecek (örn. “ırkçı hakaret”, “cinsel şiddet tehdidi”).
+
+  KURALLAR
+  1. **“VAR”** yazılacak durumlar
+     a. Hakaret/tehdit ► ağır küfür, doğrudan aşağılama, ölüm-yaralama vb. açık tehditler
+     b. Nefret söylemi ► ırk, etnik köken, din, cinsiyet, cinsel yönelim, engellilik vb. hedef alan aşağılayıcı ifadeler
+     c. Şiddet çağrısı ► “kesin şunu”, “öldür onları” gibi doğrudan ya da ciddi şiddet teşviki
+     d. Cinsel saldırı ► tecavüz, taciz, grooming içerikli ifadeler
+  2. **“YOK”** yazılacak durumlar
+     • Oyun dili / rekabetçi kızıştırma: “noob”, “lan”, “bittin”, “altıma sıçtım”, “öldüm gülmekten”
+     • Hafif argo / espirili beddua: “başına taş düşsün”, “dık” eki gibi zararsız kelime parçaları
+     • Anlamı belirsiz veya bağlam gereği zararsız cümleler
+  3. ÖZELLİKLER
+     • Sansürlü/kısaltılmış küfürleri (f*k, s*ktir) tanı; gerekiyorsa “VAR” de.
+     • Sadece mesajın içeriğine bak; önceki-sonraki iletileri, gönderen kimliğini vb. dikkate alma.
+     • Çıktı kesinlikle büyük harf ve tırnaksız olacak: **VAR** ya da **YOK**
+  ÖRNEKLER:
+  oradan taşın dık” YOK
+  “öldürürüm seni oğlum” VAR – tehdit
+  “a^2na'ı s2^ker^2im” VAR – ailevi hakaret
+  “öldüm lan LOL” YOK
+  “Orospu Çocuğu” VAR – ağır küfür/ailevi küfür
+  “noob team” YOK
+
+  Kullanıcının Mesajı:
 threshold: 0.5
 punishments:
   first: 5
