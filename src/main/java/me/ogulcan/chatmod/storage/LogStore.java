@@ -37,6 +37,12 @@ public class LogStore {
         return new ArrayList<>(logs);
     }
 
+    /** Remove all log entries from memory and disk. */
+    public synchronized void clear() {
+        logs.clear();
+        save();
+    }
+
     private void load() {
         if (!file.exists()) return;
         try (FileReader reader = new FileReader(file)) {

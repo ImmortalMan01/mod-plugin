@@ -189,6 +189,13 @@ public class DashboardGUI implements Listener {
                             openingNew = true;
                             viewer.openInventory(inventory);
                         }
+                        case "clear-logs" -> {
+                            plugin.getLogStore().clear();
+                            viewer.sendMessage(plugin.getMessages().get("logs-cleared"));
+                            createMain();
+                            openingNew = true;
+                            viewer.openInventory(inventory);
+                        }
                         case "toggle-automute" -> {
                             plugin.setAutoMute(!plugin.isAutoMute());
                             createMain();
