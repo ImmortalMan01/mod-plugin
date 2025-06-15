@@ -45,7 +45,8 @@ public class ModerationService {
     public ModerationService(String apiKey, String model, double threshold, int rateLimit, Logger logger, boolean debug, String systemPrompt) {
         this.apiKey = apiKey;
         this.model = (model == null || model.isBlank()) ? DEFAULT_MODEL : model;
-        this.chatModel = "gpt-4.1-mini".equalsIgnoreCase(this.model);
+        this.chatModel = "gpt-4.1-mini".equalsIgnoreCase(this.model) ||
+                "gpt-4.1".equalsIgnoreCase(this.model);
         this.systemPrompt = (systemPrompt == null || systemPrompt.isBlank()) ? DEFAULT_SYSTEM_PROMPT : systemPrompt;
         this.threshold = threshold;
         this.rateLimit = rateLimit;
