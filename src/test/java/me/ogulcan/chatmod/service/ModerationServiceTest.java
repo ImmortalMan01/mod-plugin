@@ -111,6 +111,28 @@ public class ModerationServiceTest {
         assertFalse(r.triggered);
     }
 
+    @Test
+    public void testChatModelTriggeredGpt41() throws Exception {
+        service = new ModerationService("test", "gpt-4.1", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT) {
+            @Override
+            protected String getChatUrl() { return server.url("/v1/chat/completions").toString(); }
+        };
+        server.enqueue(new MockResponse().setBody(chatResponse("var")));
+        ModerationService.Result r = service.moderate("bad").get();
+        assertTrue(r.triggered);
+    }
+
+    @Test
+    public void testChatModelNotTriggeredGpt41() throws Exception {
+        service = new ModerationService("test", "gpt-4.1", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT) {
+            @Override
+            protected String getChatUrl() { return server.url("/v1/chat/completions").toString(); }
+        };
+        server.enqueue(new MockResponse().setBody(chatResponse("yok")));
+        ModerationService.Result r = service.moderate("ok").get();
+        assertFalse(r.triggered);
+    }
+
     private String chatResponse(String text) {
         return new Gson().toJson(Map.of("choices", new Object[]{
                 Map.of("message", Map.of("content", text))

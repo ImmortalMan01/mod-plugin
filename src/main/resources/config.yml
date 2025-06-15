@@ -1,6 +1,6 @@
 openai-key: "REPLACE_ME"
 language: en
-# Set to `gpt-4.1-mini` to use the chat model with a profanity check prompt
+# Set to 'gpt-4.1-mini' or 'gpt-4.1' to use the chat model with a profanity check prompt
 model: omni-moderation-latest
 # Prompt used by the chat model
 chat-prompt: "Bu cümlede küfür veya hakaret varsa sadece var yoksa yok yaz (kullanıcı küfürü gizmelek için özel karakrerler veya sansürler kullanmış olabilir dikkat et):"
