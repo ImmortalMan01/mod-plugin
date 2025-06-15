@@ -6,6 +6,7 @@ import me.ogulcan.chatmod.listener.PlayerListener;
 import me.ogulcan.chatmod.listener.PrivateMessageListener;
 import me.ogulcan.chatmod.service.ModerationService;
 import me.ogulcan.chatmod.storage.PunishmentStore;
+import me.ogulcan.chatmod.storage.LogStore;
 import me.ogulcan.chatmod.util.Messages;
 import org.bukkit.scheduler.BukkitTask;
 import org.bukkit.event.HandlerList;
@@ -21,6 +22,7 @@ import java.io.File;
 public class Main extends JavaPlugin {
     private ModerationService moderationService;
     private PunishmentStore store;
+    private LogStore logStore;
     private Messages messages;
     private FileConfiguration guiConfig;
     private boolean autoMute = true;
@@ -53,15 +55,21 @@ public class Main extends JavaPlugin {
         }
         this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug, prompt);
         this.store = new PunishmentStore(new File(getDataFolder(), "data/punishments.json"));
-        getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store), this);
+        int logLimit = getConfig().getInt("log-limit", 100);
+        this.logStore = new LogStore(new File(getDataFolder(), "data/logs.json"), logLimit);
+        getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store, logStore), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
         getServer().getPluginManager().registerEvents(new PrivateMessageListener(this, store), this);
 
-        getCommand("cm").setExecutor(new CmCommand(this, store));
+        getCommand("cm").setExecutor(new CmCommand(this, store, logStore));
     }
 
     public PunishmentStore getStore() {
         return store;
+    }
+
+    public LogStore getLogStore() {
+        return logStore;
     }
 
     public Messages getMessages() {
@@ -101,8 +109,11 @@ public class Main extends JavaPlugin {
         boolean debug = getConfig().getBoolean("debug", false);
         this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug, prompt);
 
+        int logLimit = getConfig().getInt("log-limit", 100);
+        this.logStore = new LogStore(new File(getDataFolder(), "data/logs.json"), logLimit);
+
         HandlerList.unregisterAll(this);
-        getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store), this);
+        getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store, logStore), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
         getServer().getPluginManager().registerEvents(new PrivateMessageListener(this, store), this);
     }

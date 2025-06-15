@@ -3,6 +3,8 @@ package me.ogulcan.chatmod.command;
 import me.ogulcan.chatmod.Main;
 import me.ogulcan.chatmod.gui.DashboardGUI;
 import me.ogulcan.chatmod.storage.PunishmentStore;
+import me.ogulcan.chatmod.storage.LogStore;
+import me.ogulcan.chatmod.gui.LogGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -14,10 +16,12 @@ import java.util.Arrays;
 public class CmCommand implements CommandExecutor {
     private final Main plugin;
     private final PunishmentStore store;
+    private final LogStore logs;
 
-    public CmCommand(Main plugin, PunishmentStore store) {
+    public CmCommand(Main plugin, PunishmentStore store, LogStore logs) {
         this.plugin = plugin;
         this.store = store;
+        this.logs = logs;
     }
 
     @Override
@@ -29,6 +33,7 @@ public class CmCommand implements CommandExecutor {
             sender.sendMessage(plugin.getMessages().get("command-status"));
             sender.sendMessage(plugin.getMessages().get("command-reload"));
             sender.sendMessage(plugin.getMessages().get("command-gui"));
+            sender.sendMessage(plugin.getMessages().get("command-logs"));
             return true;
         }
         String sub = args[0].toLowerCase();
@@ -44,6 +49,8 @@ public class CmCommand implements CommandExecutor {
                 return reload(sender);
             case "gui":
                 return gui(sender);
+            case "logs":
+                return logs(sender);
             default:
                 return false;
         }
@@ -113,7 +120,20 @@ public class CmCommand implements CommandExecutor {
             sender.sendMessage(plugin.getMessages().get("no-permission"));
             return true;
         }
-        new DashboardGUI(plugin, store, plugin.getGuiConfig(), player).open();
+        new DashboardGUI(plugin, store, logs, plugin.getGuiConfig(), player).open();
+        return true;
+    }
+
+    private boolean logs(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(plugin.getMessages().get("only-players"));
+            return true;
+        }
+        if (!player.hasPermission("chatmoderation.admin")) {
+            sender.sendMessage(plugin.getMessages().get("no-permission"));
+            return true;
+        }
+        new LogGUI(plugin, logs, player).open();
         return true;
     }
 }

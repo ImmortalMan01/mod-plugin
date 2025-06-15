@@ -117,3 +117,11 @@ how many offences they had in the last 24&nbsp;hours.
 Use `/cm reload` to re-read all configuration files. OpenAI options such as
 `openai-key`, `model`, `threshold` and `rate-limit` are applied immediately and
 event listeners are re-registered without restarting the server.
+
+## Chat Logs
+
+Every punishment is recorded in `data/logs.json`. The number of stored entries
+is controlled by the `log-limit` option in `config.yml` (default 100).
+Admins can view recent logs with `/cm logs` or by clicking the **View Logs**
+button in the dashboard GUI. The `logs` screen supports pagination if there are
+more than 45 entries.

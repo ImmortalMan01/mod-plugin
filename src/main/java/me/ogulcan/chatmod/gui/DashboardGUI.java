@@ -2,6 +2,8 @@ package me.ogulcan.chatmod.gui;
 
 import me.ogulcan.chatmod.Main;
 import me.ogulcan.chatmod.storage.PunishmentStore;
+import me.ogulcan.chatmod.storage.LogStore;
+import me.ogulcan.chatmod.gui.LogGUI;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -29,6 +31,7 @@ import java.util.*;
 public class DashboardGUI implements Listener {
     private final Main plugin;
     private final PunishmentStore store;
+    private final LogStore logs;
     private FileConfiguration gui;
     private final Player viewer;
     private Inventory inventory;
@@ -48,9 +51,10 @@ public class DashboardGUI implements Listener {
         }
     }
 
-    public DashboardGUI(Main plugin, PunishmentStore store, FileConfiguration gui, Player viewer) {
+    public DashboardGUI(Main plugin, PunishmentStore store, LogStore logs, FileConfiguration gui, Player viewer) {
         this.plugin = plugin;
         this.store = store;
+        this.logs = logs;
         this.gui = gui;
         this.viewer = viewer;
         createMain();
@@ -181,6 +185,10 @@ public class DashboardGUI implements Listener {
                             createMain();
                             openingNew = true;
                             viewer.openInventory(inventory);
+                        }
+                        case "logs" -> {
+                            openingNew = true;
+                            new LogGUI(plugin, logs, viewer).open();
                         }
                     }
                 }

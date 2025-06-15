@@ -76,3 +76,4 @@ blocked-words:
   - sik
   - yarak
   - got
+log-limit: 100
