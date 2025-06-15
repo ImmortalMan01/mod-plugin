@@ -9,7 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.scheduler.BukkitRunnable;
+import org.bukkit.configuration.ConfigurationSection;
+import java.util.Map;
+import java.util.HashMap;
 
 import java.time.Duration;
 import java.util.List;
@@ -23,6 +25,8 @@ public class ChatListener implements Listener {
     private final List<String> words;
     private final boolean useBlockedWords;
     private final boolean useBlockedCategories;
+    private final boolean useCategoryThresholds;
+    private final Map<String, Double> categoryThresholds = new HashMap<>();
 
     public ChatListener(Main plugin, ModerationService service, PunishmentStore store) {
         this.plugin = plugin;
@@ -32,6 +36,13 @@ public class ChatListener implements Listener {
         this.words = plugin.getConfig().getStringList("blocked-words");
         this.useBlockedWords = plugin.getConfig().getBoolean("use-blocked-words", true);
         this.useBlockedCategories = plugin.getConfig().getBoolean("use-blocked-categories", true);
+        this.useCategoryThresholds = plugin.getConfig().getBoolean("use-category-thresholds", false);
+        ConfigurationSection section = plugin.getConfig().getConfigurationSection("category-thresholds");
+        if (section != null) {
+            for (String key : section.getKeys(false)) {
+                this.categoryThresholds.put(key, section.getDouble(key));
+            }
+        }
     }
 
     @EventHandler
@@ -51,6 +62,20 @@ public class ChatListener implements Listener {
             return;
         }
         service.moderate(message).thenAccept(result -> {
+            boolean catThresholdTrigger = false;
+            if (useCategoryThresholds) {
+                for (Map.Entry<String, Double> e : result.scores.entrySet()) {
+                    Double th = categoryThresholds.get(e.getKey());
+                    if (th != null && e.getValue() >= th) {
+                        catThresholdTrigger = true;
+                        break;
+                    }
+                }
+            }
+            if (catThresholdTrigger) {
+                Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player));
+                return;
+            }
             if (!result.triggered) return;
             boolean categoryMatch = useBlockedCategories &&
                     result.scores.keySet().stream().anyMatch(categories::contains);

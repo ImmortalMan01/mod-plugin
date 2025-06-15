@@ -52,6 +52,9 @@ apply mutes when the API marks a message as `blocked`.
 You can also define `blocked-words` for custom profanity detection. Any chat message
 containing one of these words will be muted without an API call. Set `use-blocked-words`
 to `false` to disable this list-based filter and rely solely on the OpenAI model.
+Enable `use-category-thresholds` to apply custom score requirements per category.
+These values are configured under `category-thresholds` and do not replace the
+global `threshold` option.
 The filter normalizes text when matching, converting Turkish letters like
 `ş`, `ö`, `ç`, `ğ`, `ı` and `ü` to their ASCII equivalents and removing other
 diacritics. Punctuation is converted to spaces so word boundaries are kept.
