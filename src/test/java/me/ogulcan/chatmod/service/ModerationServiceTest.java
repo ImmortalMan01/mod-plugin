@@ -47,6 +47,13 @@ public class ModerationServiceTest {
     }
 
     @Test
+    public void testFlaggedBelowThreshold() throws Exception {
+        server.enqueue(new MockResponse().setBody(response(true, false, 0.3)));
+        ModerationService.Result r = service.moderate("hmm").get();
+        assertFalse(r.triggered);
+    }
+
+    @Test
     public void testBlocked() throws Exception {
         server.enqueue(new MockResponse().setBody(blocked()));
         ModerationService.Result r = service.moderate("bad").get();

@@ -126,10 +126,11 @@ public class ModerationService {
                     }
                     ModerationResponse.Result r = mr.results[0];
                     Map<String, Double> scores = r.categoryScores;
-                    boolean trigger = r.flagged;
-                    for (String cat : scores.keySet()) {
-                        if (scores.get(cat) >= threshold) {
+                    boolean trigger = r.blocked;
+                    for (double score : scores.values()) {
+                        if (score >= threshold) {
                             trigger = true;
+                            break;
                         }
                     }
                     if (debug) {
