@@ -18,7 +18,7 @@ public class ModerationService {
     private static final String URL = "https://api.openai.com/v1/moderations";
     private static final String CHAT_URL = "https://api.openai.com/v1/chat/completions";
     private static final String DEFAULT_MODEL = "omni-moderation-latest";
-    private static final String SYSTEM_PROMPT =
+    public static final String DEFAULT_SYSTEM_PROMPT =
             "Bu c\u00fcmlede k\u00fcf\u00fcr veya hakaret varsa sadece var yoksa yok yaz (kullan\u0131c\u0131 k\u00fcf\u00fcr\u00fc gizmelek i\u00e7in \u00f6zel karakrerler veya sans\u00fcrler kullanm\u0131\u015f olabilir dikkat et):";
     private final OkHttpClient client = new OkHttpClient();
     private final Gson gson = new Gson();
@@ -30,6 +30,7 @@ public class ModerationService {
     private final boolean chatModel;
     private final boolean enabled;
     private final boolean debug;
+    private final String systemPrompt;
     private Instant window = Instant.now();
     private int count = 0;
 
@@ -41,10 +42,11 @@ public class ModerationService {
         return CHAT_URL;
     }
 
-    public ModerationService(String apiKey, String model, double threshold, int rateLimit, Logger logger, boolean debug) {
+    public ModerationService(String apiKey, String model, double threshold, int rateLimit, Logger logger, boolean debug, String systemPrompt) {
         this.apiKey = apiKey;
         this.model = (model == null || model.isBlank()) ? DEFAULT_MODEL : model;
         this.chatModel = "gpt-4.1-mini".equalsIgnoreCase(this.model);
+        this.systemPrompt = (systemPrompt == null || systemPrompt.isBlank()) ? DEFAULT_SYSTEM_PROMPT : systemPrompt;
         this.threshold = threshold;
         this.rateLimit = rateLimit;
         this.logger = logger;
@@ -227,7 +229,7 @@ public class ModerationService {
         final int max_tokens = 1;
         ChatPayload(String input) {
             this.messages = new Message[]{
-                    new Message("system", SYSTEM_PROMPT),
+                    new Message("system", systemPrompt),
                     new Message("user", input)
             };
         }
