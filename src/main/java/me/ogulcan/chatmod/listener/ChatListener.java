@@ -58,6 +58,7 @@ public class ChatListener implements Listener {
             event.setCancelled(true);
             return;
         }
+        if (player.hasPermission("chatmoderation.bypass")) return;
         String message = event.getMessage();
         if (useBlockedWords && WordFilter.containsBlockedWord(message, words)) {
             Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player));
