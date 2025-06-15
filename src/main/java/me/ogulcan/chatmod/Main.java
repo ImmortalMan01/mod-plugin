@@ -44,13 +44,19 @@ public class Main extends JavaPlugin {
         this.messages = new Messages(this, lang);
         String apiKey = getConfig().getString("openai-key", "");
         double threshold = getConfig().getDouble("threshold", 0.5);
+        Map<String, Double> categoryThresholds = new HashMap<>();
+        if (getConfig().isConfigurationSection("category-thresholds")) {
+            for (String key : getConfig().getConfigurationSection("category-thresholds").getKeys(false)) {
+                categoryThresholds.put(key, getConfig().getDouble("category-thresholds." + key));
+            }
+        }
         int rateLimit = getConfig().getInt("rate-limit", 60);
         String model = getConfig().getString("model", "omni-moderation-latest");
         boolean debug = getConfig().getBoolean("debug", false);
         if (debug) {
             getLogger().info("Debug mode enabled");
         }
-        this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug);
+        this.moderationService = new ModerationService(apiKey, model, threshold, categoryThresholds, rateLimit, this.getLogger(), debug);
         this.store = new PunishmentStore(new File(getDataFolder(), "data/punishments.json"));
         getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
@@ -94,10 +100,16 @@ public class Main extends JavaPlugin {
 
         String apiKey = getConfig().getString("openai-key", "");
         double threshold = getConfig().getDouble("threshold", 0.5);
+        Map<String, Double> categoryThresholds = new HashMap<>();
+        if (getConfig().isConfigurationSection("category-thresholds")) {
+            for (String key : getConfig().getConfigurationSection("category-thresholds").getKeys(false)) {
+                categoryThresholds.put(key, getConfig().getDouble("category-thresholds." + key));
+            }
+        }
         int rateLimit = getConfig().getInt("rate-limit", 60);
         String model = getConfig().getString("model", "omni-moderation-latest");
         boolean debug = getConfig().getBoolean("debug", false);
-        this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug);
+        this.moderationService = new ModerationService(apiKey, model, threshold, categoryThresholds, rateLimit, this.getLogger(), debug);
 
         HandlerList.unregisterAll(this);
         getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store), this);

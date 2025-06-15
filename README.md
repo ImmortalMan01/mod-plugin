@@ -24,7 +24,8 @@ gradle test
 ## Configuration
 The plugin generates `config.yml` on first run. **You must replace** the `openai-key`
 value with your own API key or moderation requests will be skipped. Adjust
-thresholds or punishments as needed.
+thresholds or punishments as needed. You can also override the threshold for
+individual moderation categories using `category-thresholds` in `config.yml`.
 Set `language` to `en` or `tr` to change plugin messages. The selected language file (`messages_en.yml` or `messages_tr.yml`) will be copied to the plugin folder so you can edit any text.
 Enable `debug: true` in `config.yml` to log moderation responses and the selected moderation model for troubleshooting.
 Set `countdown-offline` to `false` if you want mute timers to pause while muted players are offline.

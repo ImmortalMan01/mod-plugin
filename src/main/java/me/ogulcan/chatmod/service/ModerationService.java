@@ -21,6 +21,7 @@ public class ModerationService {
     private final Gson gson = new Gson();
     private final String apiKey;
     private final double threshold;
+    private final Map<String, Double> categoryThresholds;
     private final int rateLimit;
     private final Logger logger;
     private final String model;
@@ -34,9 +35,14 @@ public class ModerationService {
     }
 
     public ModerationService(String apiKey, String model, double threshold, int rateLimit, Logger logger, boolean debug) {
+        this(apiKey, model, threshold, new HashMap<>(), rateLimit, logger, debug);
+    }
+
+    public ModerationService(String apiKey, String model, double threshold, Map<String, Double> categoryThresholds, int rateLimit, Logger logger, boolean debug) {
         this.apiKey = apiKey;
         this.model = (model == null || model.isBlank()) ? DEFAULT_MODEL : model;
         this.threshold = threshold;
+        this.categoryThresholds = categoryThresholds == null ? new HashMap<>() : new HashMap<>(categoryThresholds);
         this.rateLimit = rateLimit;
         this.logger = logger;
         this.debug = debug;
@@ -127,8 +133,9 @@ public class ModerationService {
                     ModerationResponse.Result r = mr.results[0];
                     Map<String, Double> scores = r.categoryScores;
                     boolean trigger = r.blocked;
-                    for (double score : scores.values()) {
-                        if (score >= threshold) {
+                    for (Map.Entry<String, Double> entry : scores.entrySet()) {
+                        double th = categoryThresholds.getOrDefault(entry.getKey(), threshold);
+                        if (entry.getValue() >= th) {
                             trigger = true;
                             break;
                         }

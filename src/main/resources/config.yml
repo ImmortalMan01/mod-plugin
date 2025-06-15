@@ -2,6 +2,11 @@ openai-key: "REPLACE_ME"
 language: en
 model: omni-moderation-latest
 threshold: 0.5
+# Override threshold per category, e.g.:
+# category-thresholds:
+#   harassment: 0.4
+#   hate/threatening: 0.2
+category-thresholds: {}
 punishments:
   first: 5
   second: 30
