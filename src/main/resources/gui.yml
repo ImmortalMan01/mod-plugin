@@ -24,6 +24,11 @@ main:
       material: WRITABLE_BOOK
       name: "&eView Logs"
       action: logs
+    clear-logs:
+      slot: 44
+      material: LAVA_BUCKET
+      name: "&cClear Logs"
+      action: clear-logs
 player:
   size: 9
   buttons:

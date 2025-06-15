@@ -94,6 +94,11 @@ main:
       material: WRITABLE_BOOK
       name: "&eView Logs"
       action: logs
+    clear-logs:
+      slot: 44
+      material: LAVA_BUCKET
+      name: "&cClear Logs"
+      action: clear-logs
 player:
   size: 9
   buttons:
@@ -122,7 +127,8 @@ how many offences they had in the last 24&nbsp;hours.
 A new **Logs** button on the dashboard opens a paginated view of recent chat
 logs. Each entry displays the player's head, a snippet of the muted message and
 when it was recorded. These logs are stored in `data/logs.json` and persist even
-if the server runs in offline mode.
+if the server runs in offline mode. You can remove all entries with the **Clear
+Logs** button or by running `/cm clearlogs`.
 
 Use `/cm reload` to re-read all configuration files. OpenAI options such as
 `openai-key`, `model`, `threshold` and `rate-limit` are applied immediately and

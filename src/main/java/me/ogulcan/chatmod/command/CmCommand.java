@@ -29,6 +29,7 @@ public class CmCommand implements CommandExecutor {
             sender.sendMessage(plugin.getMessages().get("command-status"));
             sender.sendMessage(plugin.getMessages().get("command-reload"));
             sender.sendMessage(plugin.getMessages().get("command-gui"));
+            sender.sendMessage(plugin.getMessages().get("command-clearlogs"));
             return true;
         }
         String sub = args[0].toLowerCase();
@@ -44,6 +45,8 @@ public class CmCommand implements CommandExecutor {
                 return reload(sender);
             case "gui":
                 return gui(sender);
+            case "clearlogs":
+                return clearLogs(sender);
             default:
                 return false;
         }
@@ -114,6 +117,12 @@ public class CmCommand implements CommandExecutor {
             return true;
         }
         new DashboardGUI(plugin, store, plugin.getGuiConfig(), player).open();
+        return true;
+    }
+
+    private boolean clearLogs(CommandSender sender) {
+        plugin.getLogStore().clear();
+        sender.sendMessage(plugin.getMessages().get("logs-cleared"));
         return true;
     }
 }
