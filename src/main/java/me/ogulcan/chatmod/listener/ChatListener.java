@@ -9,10 +9,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
-import org.bukkit.scheduler.BukkitRunnable;
 
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 
 public class ChatListener implements Listener {
@@ -23,6 +24,8 @@ public class ChatListener implements Listener {
     private final List<String> words;
     private final boolean useBlockedWords;
     private final boolean useBlockedCategories;
+    private final Map<String, Boolean> categoryEnabled;
+    private final Map<String, Double> categoryRatio;
 
     public ChatListener(Main plugin, ModerationService service, PunishmentStore store) {
         this.plugin = plugin;
@@ -32,6 +35,16 @@ public class ChatListener implements Listener {
         this.words = plugin.getConfig().getStringList("blocked-words");
         this.useBlockedWords = plugin.getConfig().getBoolean("use-blocked-words", true);
         this.useBlockedCategories = plugin.getConfig().getBoolean("use-blocked-categories", true);
+        this.categoryEnabled = new HashMap<>();
+        this.categoryRatio = new HashMap<>();
+        org.bukkit.configuration.ConfigurationSection cs = plugin.getConfig().getConfigurationSection("category-settings");
+        double def = plugin.getConfig().getDouble("threshold", 0.5);
+        if (cs != null) {
+            for (String key : cs.getKeys(false)) {
+                categoryEnabled.put(key, cs.getBoolean(key + ".enabled", true));
+                categoryRatio.put(key, cs.getDouble(key + ".ratio", def));
+            }
+        }
     }
 
     @EventHandler
@@ -51,11 +64,23 @@ public class ChatListener implements Listener {
             return;
         }
         service.moderate(message).thenAccept(result -> {
-            if (!result.triggered) return;
-            boolean categoryMatch = useBlockedCategories &&
-                    result.scores.keySet().stream().anyMatch(categories::contains);
-            if (!categoryMatch && !result.blocked) return;
-            Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player));
+            boolean shouldMute = result.blocked;
+            if (useBlockedCategories) {
+                for (Map.Entry<String, Double> e : result.scores.entrySet()) {
+                    String cat = e.getKey();
+                    double score = e.getValue();
+                    boolean enabled = categoryEnabled.getOrDefault(cat, categories.contains(cat));
+                    if (!enabled) continue;
+                    double ratio = categoryRatio.getOrDefault(cat, plugin.getConfig().getDouble("threshold", 0.5));
+                    if (score >= ratio) {
+                        shouldMute = true;
+                        break;
+                    }
+                }
+            }
+            if (shouldMute) {
+                Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player));
+            }
         });
     }
 

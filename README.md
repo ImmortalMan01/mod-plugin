@@ -49,6 +49,10 @@ violence/graphic
 ```
 Set `use-blocked-categories` to `false` if you want to ignore this list and only
 apply mutes when the API marks a message as `blocked`.
+Each category can also be tuned individually under the `category-settings`
+section. Set `enabled` to `false` to disable muting for a category or adjust the
+`ratio` value to change the score threshold used for that category. If a
+specific ratio is not provided, the global `threshold` option is used.
 You can also define `blocked-words` for custom profanity detection. Any chat message
 containing one of these words will be muted without an API call. Set `use-blocked-words`
 to `false` to disable this list-based filter and rely solely on the OpenAI model.
