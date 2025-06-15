@@ -19,3 +19,6 @@ permissions:
   chatmoderation.admin:
     description: Perform admin actions in the GUI
     default: op
+  chatmoderation.bypass:
+    description: Bypass chat moderation
+    default: op
