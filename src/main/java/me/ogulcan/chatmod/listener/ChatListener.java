@@ -4,6 +4,7 @@ import me.ogulcan.chatmod.Main;
 import me.ogulcan.chatmod.service.ModerationService;
 import me.ogulcan.chatmod.service.WordFilter;
 import me.ogulcan.chatmod.storage.PunishmentStore;
+import me.ogulcan.chatmod.storage.LogStore;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -20,6 +21,7 @@ public class ChatListener implements Listener {
     private final Main plugin;
     private final ModerationService service;
     private final PunishmentStore store;
+    private final LogStore logStore;
     private final List<String> categories;
     private final List<String> words;
     private final boolean useBlockedWords;
@@ -27,10 +29,11 @@ public class ChatListener implements Listener {
     private final Map<String, Boolean> categoryEnabled;
     private final Map<String, Double> categoryRatio;
 
-    public ChatListener(Main plugin, ModerationService service, PunishmentStore store) {
+    public ChatListener(Main plugin, ModerationService service, PunishmentStore store, LogStore logStore) {
         this.plugin = plugin;
         this.service = service;
         this.store = store;
+        this.logStore = logStore;
         this.categories = plugin.getConfig().getStringList("blocked-categories");
         this.words = plugin.getConfig().getStringList("blocked-words");
         this.useBlockedWords = plugin.getConfig().getBoolean("use-blocked-words", true);
@@ -61,7 +64,7 @@ public class ChatListener implements Listener {
         if (player.hasPermission("chatmoderation.bypass")) return;
         String message = event.getMessage();
         if (useBlockedWords && WordFilter.containsBlockedWord(message, words)) {
-            Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player));
+            Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player, message));
             return;
         }
         service.moderate(message).thenAccept(result -> {
@@ -80,12 +83,12 @@ public class ChatListener implements Listener {
                 }
             }
             if (shouldMute) {
-                Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player));
+                Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player, message));
             }
         });
     }
 
-    private void applyPunishment(Player player) {
+    private void applyPunishment(Player player, String message) {
         UUID uuid = player.getUniqueId();
         int offences24h = store.offenceCount(uuid, Duration.ofHours(24).toMillis());
         long minutes;
@@ -103,6 +106,7 @@ public class ChatListener implements Listener {
                     .forEach(p -> p.sendMessage(msg));
         }
         store.mute(uuid, minutes);
+        logStore.add(uuid, player.getName(), message);
         plugin.scheduleUnmute(uuid, minutes * 60L * 20L);
         player.sendMessage(plugin.getMessages().get("muted-player", minutes));
 

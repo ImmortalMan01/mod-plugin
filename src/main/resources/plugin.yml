@@ -22,3 +22,6 @@ permissions:
   chatmoderation.bypass:
     description: Bypass chat moderation
     default: op
+  chatmoderation.logs:
+    description: View chat logs
+    default: op

@@ -19,6 +19,11 @@ main:
       name-on: "&eAuto-Mute ON"
       name-off: "&eAuto-Mute OFF"
       action: toggle-automute
+    logs:
+      slot: 35
+      material: WRITABLE_BOOK
+      name: "&eView Logs"
+      action: logs
 player:
   size: 9
   buttons:
