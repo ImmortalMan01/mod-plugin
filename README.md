@@ -124,11 +124,11 @@ player:
 Hovering a player's head shows whether they are muted, the remaining time and
 how many offences they had in the last 24&nbsp;hours.
 
-A new **Logs** button on the dashboard opens a paginated view of recent chat
-logs. Each entry displays the player's head, a snippet of the muted message and
-when it was recorded. These logs are stored in `data/logs.json` and persist even
-if the server runs in offline mode. You can remove all entries with the **Clear
-Logs** button or by running `/cm clearlogs`.
+A new **Logs** button on the dashboard or the `/cm logs` command opens a
+paginated view of recent chat logs. Each entry displays the player's head, a
+snippet of the muted message and when it was recorded. These logs are stored in
+`data/logs.json` and persist even if the server runs in offline mode. You can
+remove all entries with the **Clear Logs** button or by running `/cm clearlogs`.
 
 Use `/cm reload` to re-read all configuration files. OpenAI options such as
 `openai-key`, `model`, `threshold` and `rate-limit` are applied immediately and

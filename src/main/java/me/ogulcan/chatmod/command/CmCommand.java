@@ -2,6 +2,7 @@ package me.ogulcan.chatmod.command;
 
 import me.ogulcan.chatmod.Main;
 import me.ogulcan.chatmod.gui.DashboardGUI;
+import me.ogulcan.chatmod.gui.LogsGUI;
 import me.ogulcan.chatmod.storage.PunishmentStore;
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
@@ -29,6 +30,7 @@ public class CmCommand implements CommandExecutor {
             sender.sendMessage(plugin.getMessages().get("command-status"));
             sender.sendMessage(plugin.getMessages().get("command-reload"));
             sender.sendMessage(plugin.getMessages().get("command-gui"));
+            sender.sendMessage(plugin.getMessages().get("command-logs"));
             sender.sendMessage(plugin.getMessages().get("command-clearlogs"));
             return true;
         }
@@ -45,6 +47,8 @@ public class CmCommand implements CommandExecutor {
                 return reload(sender);
             case "gui":
                 return gui(sender);
+            case "logs":
+                return logs(sender);
             case "clearlogs":
                 return clearLogs(sender);
             default:
@@ -117,6 +121,19 @@ public class CmCommand implements CommandExecutor {
             return true;
         }
         new DashboardGUI(plugin, store, plugin.getGuiConfig(), player).open();
+        return true;
+    }
+
+    private boolean logs(CommandSender sender) {
+        if (!(sender instanceof Player player)) {
+            sender.sendMessage(plugin.getMessages().get("only-players"));
+            return true;
+        }
+        if (!player.hasPermission("chatmoderation.logs")) {
+            sender.sendMessage(plugin.getMessages().get("no-permission"));
+            return true;
+        }
+        new LogsGUI(plugin, plugin.getLogStore(), player);
         return true;
     }
 
