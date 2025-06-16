@@ -234,7 +234,7 @@ public class ModerationService {
     private class ChatPayload {
         final String model = ModerationService.this.model;
         final Message[] messages;
-        final double temperature = 0;
+        final double temperature = reasoningModel ? 1 : 0;
         final Integer max_tokens;
         @SerializedName("max_completion_tokens")
         final Integer maxCompletionTokens;
