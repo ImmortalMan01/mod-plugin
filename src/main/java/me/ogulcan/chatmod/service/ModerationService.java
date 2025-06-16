@@ -28,6 +28,7 @@ public class ModerationService {
     private final Logger logger;
     private final String model;
     private final boolean chatModel;
+    private final boolean reasoningModel;
     private final boolean enabled;
     private final boolean debug;
     private final String systemPrompt;
@@ -48,6 +49,8 @@ public class ModerationService {
         this.chatModel = "gpt-4.1-mini".equalsIgnoreCase(this.model) ||
                 "gpt-4.1".equalsIgnoreCase(this.model) ||
                 "o3".equalsIgnoreCase(this.model) ||
+                "o4-mini".equalsIgnoreCase(this.model);
+        this.reasoningModel = "o3".equalsIgnoreCase(this.model) ||
                 "o4-mini".equalsIgnoreCase(this.model);
         this.systemPrompt = (systemPrompt == null || systemPrompt.isBlank()) ? DEFAULT_SYSTEM_PROMPT : systemPrompt;
         this.threshold = threshold;
@@ -229,12 +232,22 @@ public class ModerationService {
         final String model = ModerationService.this.model;
         final Message[] messages;
         final double temperature = 0;
-        final int max_tokens = 1;
+        final Integer max_tokens;
+        @SerializedName("max_completion_tokens")
+        final Integer maxCompletionTokens;
+
         ChatPayload(String input) {
             this.messages = new Message[]{
                     new Message("system", systemPrompt),
                     new Message("user", input)
             };
+            if (reasoningModel) {
+                this.max_tokens = null;
+                this.maxCompletionTokens = 1;
+            } else {
+                this.max_tokens = 1;
+                this.maxCompletionTokens = null;
+            }
         }
     }
 
