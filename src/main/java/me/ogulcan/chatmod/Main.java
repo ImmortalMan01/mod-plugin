@@ -6,6 +6,7 @@ import me.ogulcan.chatmod.listener.PlayerListener;
 import me.ogulcan.chatmod.listener.PrivateMessageListener;
 import me.ogulcan.chatmod.service.ModerationService;
 import me.ogulcan.chatmod.service.DiscordNotifier;
+import me.ogulcan.chatmod.web.UnmuteServer;
 import me.ogulcan.chatmod.storage.PunishmentStore;
 import me.ogulcan.chatmod.storage.LogStore;
 import me.ogulcan.chatmod.util.Messages;
@@ -25,6 +26,7 @@ public class Main extends JavaPlugin {
     private PunishmentStore store;
     private LogStore logStore;
     private DiscordNotifier notifier;
+    private UnmuteServer webServer;
     private Messages messages;
     private FileConfiguration guiConfig;
     private boolean autoMute = true;
@@ -54,6 +56,7 @@ public class Main extends JavaPlugin {
         String effort = getConfig().getString("thinking-effort", "medium");
         boolean debug = getConfig().getBoolean("debug", false);
         String discordUrl = getConfig().getString("discord-url", "");
+        int webPort = getConfig().getInt("web-port", 0);
         if (debug) {
             getLogger().info("Debug mode enabled");
         }
@@ -61,6 +64,14 @@ public class Main extends JavaPlugin {
         this.notifier = new DiscordNotifier(discordUrl);
         this.store = new PunishmentStore(new File(getDataFolder(), "data/punishments.json"));
         this.logStore = new LogStore(new File(getDataFolder(), "data/logs.json"));
+        if (webPort > 0) {
+            try {
+                this.webServer = new UnmuteServer(this, webPort);
+                getLogger().info("Web server running on port " + webPort);
+            } catch (Exception e) {
+                getLogger().warning("Failed to start web server: " + e.getMessage());
+            }
+        }
         getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store, logStore, notifier), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
         getServer().getPluginManager().registerEvents(new PrivateMessageListener(this, store), this);
@@ -113,13 +124,35 @@ public class Main extends JavaPlugin {
         String effort = getConfig().getString("thinking-effort", "medium");
         boolean debug = getConfig().getBoolean("debug", false);
         String discordUrl = getConfig().getString("discord-url", "");
+        int webPort = getConfig().getInt("web-port", 0);
         this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug, prompt, effort);
         this.notifier = new DiscordNotifier(discordUrl);
+
+        if (webServer != null) {
+            webServer.stop();
+            webServer = null;
+        }
+        if (webPort > 0) {
+            try {
+                webServer = new UnmuteServer(this, webPort);
+                getLogger().info("Web server running on port " + webPort);
+            } catch (Exception e) {
+                getLogger().warning("Failed to start web server: " + e.getMessage());
+            }
+        }
 
         HandlerList.unregisterAll(this);
         getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store, logStore, notifier), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
         getServer().getPluginManager().registerEvents(new PrivateMessageListener(this, store), this);
+    }
+
+    @Override
+    public void onDisable() {
+        if (webServer != null) {
+            webServer.stop();
+            webServer = null;
+        }
     }
 
     public boolean isAutoMute() {

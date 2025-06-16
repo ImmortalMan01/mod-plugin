@@ -68,6 +68,7 @@ category-settings:
 rate-limit: 250
 debug: false
 discord-url: "http://localhost:3000"
+web-port: 8081
 countdown-offline: true
 use-blocked-categories: true
 use-blocked-words: FALSE
