@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { Client, GatewayIntentBits } = require('discord.js');
+const { Client, GatewayIntentBits, ActionRowBuilder, ButtonBuilder, ButtonStyle } = require('discord.js');
 const express = require('express');
 const fs = require('fs-extra');
 
@@ -9,6 +9,7 @@ const logFile = process.env.LOG_FILE || '../plugins/ChatModeration/data/logs.jso
 const port = process.env.PORT || 3000;
 const prefixEnv = process.env.PREFIX;
 const prefix = ['!', '/'].includes(prefixEnv) ? prefixEnv : '!';
+const pluginUrl = process.env.PLUGIN_URL || 'http://localhost:8081';
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
@@ -32,6 +33,23 @@ client.on('messageCreate', async (message) => {
   }
 });
 
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isButton()) return;
+  if (!interaction.customId.startsWith('unmute:')) return;
+  const player = interaction.customId.substring(7);
+  try {
+    await fetch(`${pluginUrl}/unmute`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ player })
+    });
+    await interaction.reply({ content: `Unmuted ${player}`, ephemeral: true });
+  } catch (err) {
+    console.error('Failed to unmute', err);
+    await interaction.reply({ content: 'Failed to unmute.', ephemeral: true });
+  }
+});
+
 const app = express();
 app.use(express.json());
 
@@ -41,7 +59,16 @@ app.post('/mute', async (req, res) => {
   try {
     const channel = await client.channels.fetch(channelId);
     if (channel && channel.isTextBased()) {
-      await channel.send({ content: `Player **${player}** was muted for ${remaining}m. Reason: ${reason}` });
+      const row = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId(`unmute:${player}`)
+          .setLabel('Unmute')
+          .setStyle(ButtonStyle.Danger)
+      );
+      await channel.send({
+        content: `Player **${player}** was muted for ${remaining}m. Reason: ${reason}`,
+        components: [row]
+      });
     }
     res.json({ ok: true });
   } catch (err) {
