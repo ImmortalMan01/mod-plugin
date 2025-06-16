@@ -29,7 +29,7 @@ Set `language` to `en` or `tr` to change plugin messages. The selected language 
 Enable `debug: true` in `config.yml` to log moderation responses and the selected moderation model for troubleshooting.
 Set `countdown-offline` to `false` if you want mute timers to pause while muted players are offline.
 Muted players are also blocked from using private messaging commands like `/msg`.
-The `model` option defaults to OpenAI's `omni-moderation-latest`, but you may set it to any supported model. When `gpt-4.1-mini`, `gpt-4.1` or `o3` is selected the plugin will use the chat completion API with a system prompt to simply answer whether the message contains profanity.
+The `model` option defaults to OpenAI's `omni-moderation-latest`, but you may set it to any supported model. When `gpt-4.1-mini`, `gpt-4.1`, `o3` or `o4-mini` is selected the plugin will use the chat completion API with a system prompt to simply answer whether the message contains profanity.
 You can customize this system prompt via the `chat-prompt` option if you need different wording.
 All categories supported by this model are included in `blocked-categories`:
 

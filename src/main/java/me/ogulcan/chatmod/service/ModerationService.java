@@ -47,7 +47,8 @@ public class ModerationService {
         this.model = (model == null || model.isBlank()) ? DEFAULT_MODEL : model;
         this.chatModel = "gpt-4.1-mini".equalsIgnoreCase(this.model) ||
                 "gpt-4.1".equalsIgnoreCase(this.model) ||
-                "o3".equalsIgnoreCase(this.model);
+                "o3".equalsIgnoreCase(this.model) ||
+                "o4-mini".equalsIgnoreCase(this.model);
         this.systemPrompt = (systemPrompt == null || systemPrompt.isBlank()) ? DEFAULT_SYSTEM_PROMPT : systemPrompt;
         this.threshold = threshold;
         this.rateLimit = rateLimit;
