@@ -248,10 +248,13 @@ public class ModerationService {
             };
             if (reasoningModel) {
                 this.max_tokens = null;
-                this.maxCompletionTokens = 1;
+                // allow enough tokens for a short "var" or "yok" response
+                this.maxCompletionTokens = 3;
                 this.effort = reasoningEffort;
             } else {
-                this.max_tokens = 1;
+                // gpt-4.1 and similar models may require more than one token
+                // for these short replies
+                this.max_tokens = 3;
                 this.maxCompletionTokens = null;
                 this.effort = null;
             }
