@@ -3,7 +3,6 @@
   "version": "1.0.0",
   "description": "Discord bot that notifies when players are muted and displays logs.",
   "main": "index.js",
-  "type": "module",
   "scripts": {
     "start": "node index.js"
   },

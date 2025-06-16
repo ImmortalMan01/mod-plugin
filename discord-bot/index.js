@@ -1,6 +1,6 @@
-import { Client, GatewayIntentBits } from 'discord.js';
-import express from 'express';
-import fs from 'fs-extra';
+const { Client, GatewayIntentBits } = require('discord.js');
+const express = require('express');
+const fs = require('fs-extra');
 
 const token = process.env.DISCORD_TOKEN;
 const channelId = process.env.CHANNEL_ID || '1383833781483471020';
