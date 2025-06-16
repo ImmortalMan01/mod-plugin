@@ -67,6 +67,7 @@ category-settings:
     ratio: 0.5
 rate-limit: 250
 debug: false
+discord-url: "http://localhost:3000"
 countdown-offline: true
 use-blocked-categories: true
 use-blocked-words: FALSE
