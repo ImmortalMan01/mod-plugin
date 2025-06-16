@@ -7,6 +7,8 @@ const token = process.env.DISCORD_TOKEN;
 const channelId = process.env.CHANNEL_ID || '1383833781483471020';
 const logFile = process.env.LOG_FILE || '../plugins/ChatModeration/data/logs.json';
 const port = process.env.PORT || 3000;
+const prefixEnv = process.env.PREFIX;
+const prefix = ['!', '/'].includes(prefixEnv) ? prefixEnv : '!';
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
@@ -17,7 +19,7 @@ client.once('ready', () => {
 });
 
 client.on('messageCreate', async (message) => {
-  if (!message.content.startsWith('!logs')) return;
+  if (!message.content.startsWith(prefix + 'logs')) return;
   const parts = message.content.trim().split(/\s+/);
   const count = parseInt(parts[1], 10) || 5;
   try {
