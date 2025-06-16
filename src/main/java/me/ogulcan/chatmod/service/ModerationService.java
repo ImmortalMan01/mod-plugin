@@ -29,6 +29,7 @@ public class ModerationService {
     private final String model;
     private final boolean chatModel;
     private final boolean reasoningModel;
+    private final String reasoningEffort;
     private final boolean enabled;
     private final boolean debug;
     private final String systemPrompt;
@@ -43,7 +44,8 @@ public class ModerationService {
         return CHAT_URL;
     }
 
-    public ModerationService(String apiKey, String model, double threshold, int rateLimit, Logger logger, boolean debug, String systemPrompt) {
+    public ModerationService(String apiKey, String model, double threshold, int rateLimit,
+                             Logger logger, boolean debug, String systemPrompt, String reasoningEffort) {
         this.apiKey = apiKey;
         this.model = (model == null || model.isBlank()) ? DEFAULT_MODEL : model;
         this.chatModel = "gpt-4.1-mini".equalsIgnoreCase(this.model) ||
@@ -52,6 +54,7 @@ public class ModerationService {
                 "o4-mini".equalsIgnoreCase(this.model);
         this.reasoningModel = "o3".equalsIgnoreCase(this.model) ||
                 "o4-mini".equalsIgnoreCase(this.model);
+        this.reasoningEffort = reasoningEffort == null ? "medium" : reasoningEffort;
         this.systemPrompt = (systemPrompt == null || systemPrompt.isBlank()) ? DEFAULT_SYSTEM_PROMPT : systemPrompt;
         this.threshold = threshold;
         this.rateLimit = rateLimit;
@@ -235,6 +238,8 @@ public class ModerationService {
         final Integer max_tokens;
         @SerializedName("max_completion_tokens")
         final Integer maxCompletionTokens;
+        @SerializedName("reasoning_effort")
+        final String effort;
 
         ChatPayload(String input) {
             this.messages = new Message[]{
@@ -244,9 +249,11 @@ public class ModerationService {
             if (reasoningModel) {
                 this.max_tokens = null;
                 this.maxCompletionTokens = 1;
+                this.effort = reasoningEffort;
             } else {
                 this.max_tokens = 1;
                 this.maxCompletionTokens = null;
+                this.effort = null;
             }
         }
     }
