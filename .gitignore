@@ -2,3 +2,4 @@ target/
 build/
 .gradle/
 gradle/wrapper/gradle-wrapper.jar
+discord-bot/node_modules/
