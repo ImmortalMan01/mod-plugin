@@ -3,6 +3,7 @@ package me.ogulcan.chatmod.listener;
 import me.ogulcan.chatmod.Main;
 import me.ogulcan.chatmod.service.ModerationService;
 import me.ogulcan.chatmod.service.WordFilter;
+import me.ogulcan.chatmod.service.DiscordNotifier;
 import me.ogulcan.chatmod.storage.PunishmentStore;
 import me.ogulcan.chatmod.storage.LogStore;
 import org.bukkit.Bukkit;
@@ -22,6 +23,7 @@ public class ChatListener implements Listener {
     private final ModerationService service;
     private final PunishmentStore store;
     private final LogStore logStore;
+    private final DiscordNotifier notifier;
     private final List<String> categories;
     private final List<String> words;
     private final boolean useBlockedWords;
@@ -29,11 +31,12 @@ public class ChatListener implements Listener {
     private final Map<String, Boolean> categoryEnabled;
     private final Map<String, Double> categoryRatio;
 
-    public ChatListener(Main plugin, ModerationService service, PunishmentStore store, LogStore logStore) {
+    public ChatListener(Main plugin, ModerationService service, PunishmentStore store, LogStore logStore, DiscordNotifier notifier) {
         this.plugin = plugin;
         this.service = service;
         this.store = store;
         this.logStore = logStore;
+        this.notifier = notifier;
         this.categories = plugin.getConfig().getStringList("blocked-categories");
         this.words = plugin.getConfig().getStringList("blocked-words");
         this.useBlockedWords = plugin.getConfig().getBoolean("use-blocked-words", true);
@@ -121,6 +124,8 @@ public class ChatListener implements Listener {
                 remaining % 60
         );
         Bukkit.broadcastMessage(broadcast);
+
+        notifier.notifyMute(player.getName(), message, minutes);
     }
 
     private String format(long seconds) {

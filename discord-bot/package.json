@@ -1,0 +1,14 @@
+{
+  "name": "moderation-discord-bot",
+  "version": "1.0.0",
+  "description": "Discord bot that notifies when players are muted and displays logs.",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.1",
+    "express": "^4.19.2",
+    "fs-extra": "^11.2.0"
+  }
+}

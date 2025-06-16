@@ -5,6 +5,7 @@ import me.ogulcan.chatmod.listener.ChatListener;
 import me.ogulcan.chatmod.listener.PlayerListener;
 import me.ogulcan.chatmod.listener.PrivateMessageListener;
 import me.ogulcan.chatmod.service.ModerationService;
+import me.ogulcan.chatmod.service.DiscordNotifier;
 import me.ogulcan.chatmod.storage.PunishmentStore;
 import me.ogulcan.chatmod.storage.LogStore;
 import me.ogulcan.chatmod.util.Messages;
@@ -23,6 +24,7 @@ public class Main extends JavaPlugin {
     private ModerationService moderationService;
     private PunishmentStore store;
     private LogStore logStore;
+    private DiscordNotifier notifier;
     private Messages messages;
     private FileConfiguration guiConfig;
     private boolean autoMute = true;
@@ -51,13 +53,15 @@ public class Main extends JavaPlugin {
         String prompt = getConfig().getString("chat-prompt", me.ogulcan.chatmod.service.ModerationService.DEFAULT_SYSTEM_PROMPT);
         String effort = getConfig().getString("thinking-effort", "medium");
         boolean debug = getConfig().getBoolean("debug", false);
+        String discordUrl = getConfig().getString("discord-url", "");
         if (debug) {
             getLogger().info("Debug mode enabled");
         }
         this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug, prompt, effort);
+        this.notifier = new DiscordNotifier(discordUrl);
         this.store = new PunishmentStore(new File(getDataFolder(), "data/punishments.json"));
         this.logStore = new LogStore(new File(getDataFolder(), "data/logs.json"));
-        getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store, logStore), this);
+        getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store, logStore, notifier), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
         getServer().getPluginManager().registerEvents(new PrivateMessageListener(this, store), this);
 
@@ -108,10 +112,12 @@ public class Main extends JavaPlugin {
         String prompt = getConfig().getString("chat-prompt", me.ogulcan.chatmod.service.ModerationService.DEFAULT_SYSTEM_PROMPT);
         String effort = getConfig().getString("thinking-effort", "medium");
         boolean debug = getConfig().getBoolean("debug", false);
+        String discordUrl = getConfig().getString("discord-url", "");
         this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug, prompt, effort);
+        this.notifier = new DiscordNotifier(discordUrl);
 
         HandlerList.unregisterAll(this);
-        getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store, logStore), this);
+        getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store, logStore, notifier), this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
         getServer().getPluginManager().registerEvents(new PrivateMessageListener(this, store), this);
     }
