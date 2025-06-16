@@ -3,7 +3,7 @@ language: en
 # Set to 'gpt-4.1-mini', 'gpt-4.1', 'o3' or 'o4-mini' to use the chat model with a profanity check prompt
 model: omni-moderation-latest
 # Prompt used by the chat model
-chat-prompt: "Bu cümlede küfür veya hakaret varsa sadece var yoksa yok yaz (lan gibi basit argo kelimeleri ve lezyiyen gibi nicknameleri görmezden gel) (kullanıcı küfürü gizlemek için özel karakterler veya sansürler kullanmış olabilir dikkat et):"
+chat-prompt: "Sen minecraft sohbet moderatörüsün. Görevin cümlede küfür veya hakaret varsa sadece var yoksa yok yaz (lan gibi basit argo kelimeleri ve lezyiyen gibi nicknameleri ve minecraft sunucularında kullanılan terimleri görmezden gel) (kullanıcı küfürü gizlemek için özel karakterler veya sansürler kullanmış olabilir dikkat et):"
 threshold: 0.5
 punishments:
   first: 5
