@@ -9,6 +9,7 @@
   "dependencies": {
     "discord.js": "^14.15.1",
     "express": "^4.19.2",
-    "fs-extra": "^11.2.0"
+    "fs-extra": "^11.2.0",
+    "dotenv": "^16.3.1"
   }
 }
