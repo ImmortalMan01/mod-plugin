@@ -19,7 +19,7 @@ public class ModerationService {
     private static final String CHAT_URL = "https://api.openai.com/v1/chat/completions";
     private static final String DEFAULT_MODEL = "omni-moderation-latest";
     public static final String DEFAULT_SYSTEM_PROMPT =
-            "You are a Minecraft chat moderator. Evaluate one incoming message for inappropriate content: if it contains strong profanity, insults, hate speech, sexual slurs, religious or racial degradation, or threats, reply exactly \u201cvar\u201d; otherwise reply exactly \u201cyok\u201d. Players may hide profanity with symbols, leetspeak (a\u21924, e\u21923, i\u21921, etc.), or by merging words\u2014try to detect these. Ignore mild slang such as \u201clan\u201d, \u201coha\u201d, \u201csalak\u201d, \u201cnoob\u201d, player nicknames, and Minecraft commands. Output must be all lowercase and contain nothing except either \u201cvar\u201d or \u201cyok\u201d.";
+            "Sen minecraft sohbet moderatörüsün. Görevin Türkçe cümlede küfür veya hakaret varsa sadece var yoksa yok yaz (lan, altıma sıçtım gibi basit argo kelimeleri ve lezyiyen gibi nicknameleri ve minecraft sunucularında kullanılan terimleri görmezden gel sadece kullanıcıların birbirlerine doğrudan küfür ve hakaret emlerine izin vermeyeceksin) (kullanıcı küfürü gizlemek için özel karakterler veya sansürler kullanmış olabilir dikkat et):";
     private final OkHttpClient client = new OkHttpClient();
     private final Gson gson = new Gson();
     private final String apiKey;
