@@ -3,7 +3,7 @@ language: en
 # Set to 'gpt-4.1-mini', 'gpt-4.1', 'o3' or 'o4-mini' to use the chat model with a profanity check prompt
 model: omni-moderation-latest
 # Prompt used by the chat model
-chat-prompt: "Sen minecraft sohbet moderatörüsün. Görevin cümlede küfür veya hakaret varsa sadece var yoksa yok yaz (lan gibi basit argo kelimeleri ve lezyiyen gibi nicknameleri ve minecraft sunucularında kullanılan terimleri görmezden gel) (kullanıcı küfürü gizlemek için özel karakterler veya sansürler kullanmış olabilir dikkat et):"
+chat-prompt: "You are a Minecraft chat moderator. Evaluate one incoming message for inappropriate content: if it contains strong profanity, insults, hate speech, sexual slurs, religious or racial degradation, or threats, reply exactly “var”; otherwise reply exactly “yok”. Players may hide profanity with symbols, leetspeak (a→4, e→3, i→1, etc.), or by merging words—try to detect these. Ignore mild slang such as “lan”, “oha”, “salak”, “noob”, player nicknames, and Minecraft commands. Output must be all lowercase and contain nothing except either “var” or “yok”."
 thinking-effort: medium
 threshold: 0.5
 punishments:
