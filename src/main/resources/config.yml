@@ -4,6 +4,7 @@ language: en
 model: omni-moderation-latest
 # Prompt used by the chat model
 chat-prompt: "Sen minecraft sohbet moderatörüsün. Görevin cümlede küfür veya hakaret varsa sadece var yoksa yok yaz (lan gibi basit argo kelimeleri ve lezyiyen gibi nicknameleri ve minecraft sunucularında kullanılan terimleri görmezden gel) (kullanıcı küfürü gizlemek için özel karakterler veya sansürler kullanmış olabilir dikkat et):"
+thinking-effort: medium
 threshold: 0.5
 punishments:
   first: 5

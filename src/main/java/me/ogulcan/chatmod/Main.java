@@ -49,11 +49,12 @@ public class Main extends JavaPlugin {
         int rateLimit = getConfig().getInt("rate-limit", 60);
         String model = getConfig().getString("model", "omni-moderation-latest");
         String prompt = getConfig().getString("chat-prompt", me.ogulcan.chatmod.service.ModerationService.DEFAULT_SYSTEM_PROMPT);
+        String effort = getConfig().getString("thinking-effort", "medium");
         boolean debug = getConfig().getBoolean("debug", false);
         if (debug) {
             getLogger().info("Debug mode enabled");
         }
-        this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug, prompt);
+        this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug, prompt, effort);
         this.store = new PunishmentStore(new File(getDataFolder(), "data/punishments.json"));
         this.logStore = new LogStore(new File(getDataFolder(), "data/logs.json"));
         getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store, logStore), this);
@@ -105,8 +106,9 @@ public class Main extends JavaPlugin {
         int rateLimit = getConfig().getInt("rate-limit", 60);
         String model = getConfig().getString("model", "omni-moderation-latest");
         String prompt = getConfig().getString("chat-prompt", me.ogulcan.chatmod.service.ModerationService.DEFAULT_SYSTEM_PROMPT);
+        String effort = getConfig().getString("thinking-effort", "medium");
         boolean debug = getConfig().getBoolean("debug", false);
-        this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug, prompt);
+        this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug, prompt, effort);
 
         HandlerList.unregisterAll(this);
         getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store, logStore), this);
