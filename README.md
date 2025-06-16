@@ -32,8 +32,9 @@ Muted players are also blocked from using private messaging commands like `/msg`
 The `model` option defaults to OpenAI's `omni-moderation-latest`, but you may set it to any supported model. When `gpt-4.1-mini`, `gpt-4.1`, `o3` or `o4-mini` is selected the plugin will use the chat completion API with a system prompt to simply answer whether the message contains profanity.
 You can customize this system prompt via the `chat-prompt` option if you need different wording.
 For reasoning models (`o3`, `o4-mini`), the `thinking-effort` option controls
-the reasoning effort used (`low`, `medium`, or `high`). The plugin now allows
-up to **three** tokens in chat model replies to avoid OpenAI errors.
+the reasoning effort used (`low`, `medium`, or `high`). These models have no
+token limit, while standard chat models are capped at **five** tokens to avoid
+OpenAI errors.
 All categories supported by this model are included in `blocked-categories`:
 
 ```
