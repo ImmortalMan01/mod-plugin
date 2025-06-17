@@ -27,6 +27,7 @@ public class ChatListener implements Listener {
     private final DiscordNotifier notifier;
     private final List<String> categories;
     private final List<String> words;
+    private final List<String> normalizedWords;
     private final boolean useBlockedWords;
     private final boolean useBlockedCategories;
     private final Map<String, Boolean> categoryEnabled;
@@ -40,6 +41,9 @@ public class ChatListener implements Listener {
         this.notifier = notifier;
         this.categories = plugin.getConfig().getStringList("blocked-categories");
         this.words = plugin.getConfig().getStringList("blocked-words");
+        this.normalizedWords = this.words.stream()
+                .map(WordFilter::normalize)
+                .toList();
         this.useBlockedWords = plugin.getConfig().getBoolean("use-blocked-words", true);
         this.useBlockedCategories = plugin.getConfig().getBoolean("use-blocked-categories", true);
         this.categoryEnabled = new HashMap<>();
@@ -68,7 +72,7 @@ public class ChatListener implements Listener {
         if (player.hasPermission("chatmoderation.bypass")) return;
         String message = event.getMessage();
         if (BetterTeamsHook.isTeamChat(player, message)) return;
-        if (useBlockedWords && WordFilter.containsBlockedWord(message, words)) {
+        if (useBlockedWords && WordFilter.containsBlockedWord(message, normalizedWords, true)) {
             Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player, message));
             return;
         }

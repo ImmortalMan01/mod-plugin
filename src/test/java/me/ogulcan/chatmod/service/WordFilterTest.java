@@ -36,4 +36,20 @@ public class WordFilterTest {
         assertTrue(WordFilter.containsBlockedWord("s*i+k(e)y!i%m", words));
     }
 
+    @Test
+    public void testNormalizedWordList() {
+        List<String> words = List.of("orospu", "piç").stream()
+                .map(WordFilter::normalize)
+                .toList();
+        assertTrue(WordFilter.containsBlockedWord("Sen bir orospu çocuğusun", words, true));
+    }
+
+    @Test
+    public void testNormalizedWordListClean() {
+        List<String> words = List.of("orospu", "piç").stream()
+                .map(WordFilter::normalize)
+                .toList();
+        assertFalse(WordFilter.containsBlockedWord("Merhaba nasılsın", words, true));
+    }
+
 }
