@@ -85,6 +85,8 @@ public class UnmuteServer {
             String player = data == null ? null : (String) data.get("player");
             Number minutes = data == null ? null : (Number) data.get("minutes");
             String reason = data == null ? null : (String) data.get("reason");
+            String actor = data == null ? null : (String) data.get("actor");
+            String type = data == null ? null : (String) data.get("type");
             if (player == null || minutes == null) {
                 byte[] resp = "{\"error\":\"Missing fields\"}".getBytes(StandardCharsets.UTF_8);
                 exchange.sendResponseHeaders(400, resp.length);
@@ -92,11 +94,14 @@ public class UnmuteServer {
                 return;
             }
             long min = minutes.longValue();
+            String r = reason == null || reason.isBlank() ? "manual" : reason;
+            String a = actor == null || actor.isBlank() ? "Discord" : actor;
+            String t = type == null || type.isBlank() ? "discord" : type;
             Bukkit.getScheduler().runTask(plugin, () -> {
                 OfflinePlayer off = Bukkit.getOfflinePlayer(player);
                 plugin.getStore().mute(off.getUniqueId(), min);
-                plugin.getLogStore().add(off.getUniqueId(), player, reason == null || reason.isBlank() ? "manual" : reason, true);
-                plugin.getNotifier().notifyMute(player, reason == null || reason.isBlank() ? "manual" : reason, min);
+                plugin.getLogStore().add(off.getUniqueId(), player, r, t, a, min);
+                plugin.getNotifier().notifyMute(player, r, min, a, t, System.currentTimeMillis());
                 plugin.scheduleUnmute(off.getUniqueId(), min * 60L * 20L);
             });
             byte[] resp = "{\"ok\":true}".getBytes(StandardCharsets.UTF_8);

@@ -46,12 +46,8 @@ public class LogStore {
         }.runTaskTimerAsynchronously(plugin, interval, interval);
     }
 
-    public synchronized void add(UUID uuid, String name, String message) {
-        add(uuid, name, message, false);
-    }
-
-    public synchronized void add(UUID uuid, String name, String message, boolean manual) {
-        logs.add(new LogEntry(uuid, name, message, System.currentTimeMillis(), manual));
+    public synchronized void add(UUID uuid, String name, String reason, String type, String actor, long duration) {
+        logs.add(new LogEntry(uuid, name, reason, System.currentTimeMillis(), type, actor, duration));
         int max = plugin.getConfig().getInt("max-log-entries", 1000);
         if (max > 0) {
             while (logs.size() > max) {
@@ -112,16 +108,20 @@ public class LogStore {
     public static class LogEntry {
         public UUID uuid;
         public String name;
-        public String message;
+        public String reason;
         public long timestamp;
-        public boolean manual;
+        public String type;
+        public String actor;
+        public long duration;
 
-        public LogEntry(UUID uuid, String name, String message, long timestamp, boolean manual) {
+        public LogEntry(UUID uuid, String name, String reason, long timestamp, String type, String actor, long duration) {
             this.uuid = uuid;
             this.name = name;
-            this.message = message;
+            this.reason = reason;
             this.timestamp = timestamp;
-            this.manual = manual;
+            this.type = type;
+            this.actor = actor;
+            this.duration = duration;
         }
     }
 }

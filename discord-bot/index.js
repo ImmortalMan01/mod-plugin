@@ -66,7 +66,11 @@ const strings = {
     statusUnmuted: '{0} is not muted',
     langChanged: 'Language set to {0}.',
     langUsage: 'Use /cm lang <en|tr> to change language.',
-    apiMute: 'Player **{0}** was muted for {1}m. Reason: {2}',
+    apiMute: 'Mute Type: {0}\nDate: {1}\nMuted By: {2}\nMuted Player: {3}\nDuration: {4}m\nReason: {5}',
+    logFormat: '[{0}] {1} - **{3}** ({4}m) by {2}: {5}',
+    type_game: 'In-Game Manual',
+    type_discord: 'Discord Manual',
+    type_auto: 'Automatic',
     buttonUnmute: 'Unmute'
   },
   tr: {
@@ -106,7 +110,11 @@ const strings = {
     statusUnmuted: '{0} susturulmamış',
     langChanged: 'Dil {0} olarak ayarlandı.',
     langUsage: '/cm lang <en|tr> komutunu kullanın.',
-    apiMute: 'Oyuncu **{0}** {1}dk susturuldu. Sebep: {2}',
+    apiMute: 'Mute Biçimi: {0}\nTarih: {1}\nMute Atan Yetkili: {2}\nMute Atılan Oyuncu: {3}\nSüre: {4}dk\nSebep: {5}',
+    logFormat: '[{0}] {1} - **{3}** ({4}dk) Yetkili: {2} | Sebep: {5}',
+    type_game: 'Oyun İçi Manuel',
+    type_discord: 'Discord Manuel',
+    type_auto: 'Otomatik',
     buttonUnmute: 'Kaldır'
   }
 };
@@ -212,8 +220,8 @@ client.on('messageCreate', async (message) => {
     try {
       const logs = await fs.readJson(logFile);
       const latest = logs.slice(-count).map(l => {
-        const prefix = l.manual ? '[Manual] ' : '';
-        return `${new Date(l.timestamp).toLocaleString()} - **${l.name}**: ${prefix}${l.message}`;
+        const typeStr = strings[lang][`type_${l.type}`] || l.type;
+        return t('logFormat', typeStr, new Date(l.timestamp).toLocaleString(), l.actor, l.name, l.duration, l.reason);
       }).join('\n');
       await message.channel.send({ content: latest || strings[lang].noLogs });
     } catch (err) {
@@ -260,8 +268,8 @@ client.on('interactionCreate', async (interaction) => {
       const resp = await fetch(`${pluginUrl}/logs?count=5`);
       const logs = await resp.json();
       const latest = logs.map(l => {
-        const prefix = l.manual ? '[Manual] ' : '';
-        return `${new Date(l.timestamp).toLocaleString()} - **${l.name}**: ${prefix}${l.message}`;
+        const typeStr = strings[lang][`type_${l.type}`] || l.type;
+        return t('logFormat', typeStr, new Date(l.timestamp).toLocaleString(), l.actor, l.name, l.duration, l.reason);
       }).join('\n');
       await interaction.reply({ content: latest || strings[lang].noLogs, ephemeral: true });
     } else if (choice === 'mute') {
@@ -331,7 +339,7 @@ client.on('interactionCreate', async (interaction) => {
       await fetch(`${pluginUrl}/mute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ player, minutes, reason })
+        body: JSON.stringify({ player, minutes, reason, actor: interaction.user.tag, type: 'discord' })
       });
       await interaction.reply({ content: t('muted', player, minutes), ephemeral: true });
     } else if (interaction.customId === 'cm-unmute') {
@@ -357,8 +365,8 @@ client.on('interactionCreate', async (interaction) => {
     try {
       const logs = await fs.readJson(logFile);
       const latest = logs.slice(-count).map(l => {
-        const prefix = l.manual ? '[Manual] ' : '';
-        return `${new Date(l.timestamp).toLocaleString()} - **${l.name}**: ${prefix}${l.message}`;
+        const typeStr = strings[lang][`type_${l.type}`] || l.type;
+        return t('logFormat', typeStr, new Date(l.timestamp).toLocaleString(), l.actor, l.name, l.duration, l.reason);
       }).join('\n');
       await interaction.reply({ content: latest || strings[lang].noLogs });
     } catch (err) {
@@ -379,7 +387,10 @@ client.on('interactionCreate', async (interaction) => {
       const count = interaction.options.getInteger('count') ?? 5;
       const resp = await fetch(`${pluginUrl}/logs?count=${count}`);
       const data = await resp.json();
-      const latest = data.map(l => `${new Date(l.timestamp).toLocaleString()} - **${l.name}**: ${l.message}`).join('\n');
+      const latest = data.map(l => {
+        const typeStr = strings[lang][`type_${l.type}`] || l.type;
+        return t('logFormat', typeStr, new Date(l.timestamp).toLocaleString(), l.actor, l.name, l.duration, l.reason);
+      }).join('\n');
       await interaction.reply({ content: latest || strings[lang].noLogs, ephemeral: true });
     } else if (sub === 'mute') {
       const player = interaction.options.getString('player');
@@ -388,7 +399,7 @@ client.on('interactionCreate', async (interaction) => {
       await fetch(`${pluginUrl}/mute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ player, minutes, reason })
+        body: JSON.stringify({ player, minutes, reason, actor: interaction.user.tag, type: 'discord' })
       });
       await interaction.reply({ content: t('muted', player, minutes), ephemeral: true });
     } else if (sub === 'unmute') {
@@ -423,7 +434,7 @@ const app = express();
 app.use(express.json());
 
 app.post('/mute', async (req, res) => {
-  const { player, reason, remaining } = req.body;
+  const { player, reason, remaining, actor, type, timestamp } = req.body;
   if (!player) return res.status(400).json({ error: 'Missing player' });
   try {
     const channel = await client.channels.fetch(channelId);
@@ -434,10 +445,10 @@ app.post('/mute', async (req, res) => {
           .setLabel(strings[lang].buttonUnmute)
           .setStyle(ButtonStyle.Danger)
       );
-      await channel.send({
-        content: t('apiMute', player, remaining, reason),
-        components: [row]
-      });
+      const date = new Date(timestamp || Date.now()).toLocaleString();
+      const typeStr = strings[lang][`type_${type}`] || type;
+      const content = t('apiMute', typeStr, date, actor, player, remaining, reason);
+      await channel.send({ content, components: [row] });
     }
     res.json({ ok: true });
   } catch (err) {

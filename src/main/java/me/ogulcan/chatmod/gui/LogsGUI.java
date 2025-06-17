@@ -59,12 +59,14 @@ public class LogsGUI implements Listener {
             meta.setOwningPlayer(op);
             meta.setDisplayName(ChatColor.YELLOW + entry.name);
             List<String> lore = new ArrayList<>();
-            String msg = entry.message.length() > 30 ? entry.message.substring(0, 30) + "..." : entry.message;
-            if (entry.manual) {
-                lore.add(ChatColor.LIGHT_PURPLE + "[Manual] " + msg);
-            } else {
-                lore.add(ChatColor.GRAY + msg);
-            }
+            String msg = entry.reason.length() > 30 ? entry.reason.substring(0, 30) + "..." : entry.reason;
+            String type = switch (entry.type) {
+                case "game" -> ChatColor.LIGHT_PURPLE + "[Game] ";
+                case "discord" -> ChatColor.DARK_PURPLE + "[Discord] ";
+                default -> ChatColor.GRAY + "[Auto] ";
+            };
+            lore.add(type + msg);
+            lore.add(ChatColor.GREEN + entry.actor + " - " + entry.duration + "m");
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
                     .withZone(ZoneId.systemDefault());
             lore.add(ChatColor.AQUA + fmt.format(Instant.ofEpochMilli(entry.timestamp)));
