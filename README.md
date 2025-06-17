@@ -73,8 +73,10 @@ Each token is checked against the block list and consecutive single-letter
 tokens are combined, allowing `s i k` to match a blocked word of `sik` while
 
 ### GUI Customization
-A separate `gui.yml` file controls the layout of the `/cm gui` dashboard. You can edit
-inventory sizes, button slots and the material/name for each menu item. Example:
+A language-specific `gui_<lang>.yml` file controls the layout of the `/cm gui` dashboard. The `<lang>` part
+matches the `language` setting (`en` or `tr`) so editing `gui_en.yml` will affect the English interface
+while `gui_tr.yml` customizes the Turkish one. You can tweak inventory sizes, button slots and the
+material/name for each menu item. Example:
 
 ```yml
 main:

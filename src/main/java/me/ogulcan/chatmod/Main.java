@@ -38,18 +38,8 @@ public class Main extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        File guiFile = new File(getDataFolder(), "gui.yml");
-        if (!guiFile.exists()) {
-            saveResource("gui.yml", false);
-        }
-        this.guiConfig = YamlConfiguration.loadConfiguration(guiFile);
-        try (java.io.InputStreamReader reader = new java.io.InputStreamReader(getResource("gui.yml"))) {
-            if (reader != null) {
-                YamlConfiguration def = YamlConfiguration.loadConfiguration(reader);
-                this.guiConfig.setDefaults(def);
-            }
-        } catch (Exception ignored) {}
         String lang = getConfig().getString("language", "en");
+        this.guiConfig = loadGui(lang);
         this.messages = new Messages(this, lang);
         String apiKey = getConfig().getString("openai-key", "");
         double threshold = getConfig().getDouble("threshold", 0.5);
@@ -121,6 +111,25 @@ public class Main extends JavaPlugin {
         reloadAll();
     }
 
+    private FileConfiguration loadGui(String lang) {
+        String fileName = "gui_" + lang + ".yml";
+        if (getResource(fileName) == null) {
+            fileName = "gui.yml";
+        }
+        File file = new File(getDataFolder(), fileName);
+        if (!file.exists()) {
+            saveResource(fileName, false);
+        }
+        FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
+        try (java.io.InputStreamReader reader = new java.io.InputStreamReader(getResource(fileName))) {
+            if (reader != null) {
+                YamlConfiguration def = YamlConfiguration.loadConfiguration(reader);
+                cfg.setDefaults(def);
+            }
+        } catch (Exception ignored) {}
+        return cfg;
+    }
+
     /**
      * Reload configuration, language and GUI files and re-register listeners
      * with a freshly created {@link ModerationService} instance.
@@ -129,14 +138,7 @@ public class Main extends JavaPlugin {
         reloadConfig();
         String lang = getConfig().getString("language", "en");
         this.messages = new Messages(this, lang);
-        File guiFile = new File(getDataFolder(), "gui.yml");
-        this.guiConfig = YamlConfiguration.loadConfiguration(guiFile);
-        try (java.io.InputStreamReader reader = new java.io.InputStreamReader(getResource("gui.yml"))) {
-            if (reader != null) {
-                YamlConfiguration def = YamlConfiguration.loadConfiguration(reader);
-                this.guiConfig.setDefaults(def);
-            }
-        } catch (Exception ignored) {}
+        this.guiConfig = loadGui(lang);
 
         String apiKey = getConfig().getString("openai-key", "");
         double threshold = getConfig().getDouble("threshold", 0.5);
