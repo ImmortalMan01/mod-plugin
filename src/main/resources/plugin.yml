@@ -3,6 +3,7 @@ version: 0.1.0
 main: me.ogulcan.chatmod.Main
 author: ogulcan
 api-version: "1.20"
+softdepend: [BetterTeams]
 commands:
   cm:
     permission: chatmoderation.command
