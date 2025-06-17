@@ -31,7 +31,7 @@ let lang = (process.env.BOT_LANG || 'en').toLowerCase() === 'tr' ? 'tr' : 'en';
 const strings = {
   en: {
     menuLines: [
-      '/cm mute <player> <minutes> - mute player',
+      '/cm mute <player> <minutes> [reason] - mute player',
       '/cm unmute <player> - unmute player',
       '/cm status <player> - check mute status',
       '/cm reload - reload plugin',
@@ -54,6 +54,7 @@ const strings = {
     modalStatus: 'Status',
     labelPlayer: 'Player',
     labelMinutes: 'Minutes',
+    labelReason: 'Reason',
     noLogs: 'No logs found.',
     logError: 'Could not read log file.',
     pluginReloaded: 'Plugin reloaded.',
@@ -70,7 +71,7 @@ const strings = {
   },
   tr: {
     menuLines: [
-      '/cm mute <oyuncu> <dakika> - oyuncuyu sustur',
+      '/cm mute <oyuncu> <dakika> [sebep] - oyuncuyu sustur',
       '/cm unmute <oyuncu> - susturmayı kaldır',
       '/cm status <oyuncu> - susturma durumunu kontrol et',
       '/cm reload - eklentiyi yenile',
@@ -93,6 +94,7 @@ const strings = {
     modalStatus: 'Durum',
     labelPlayer: 'Oyuncu',
     labelMinutes: 'Dakika',
+    labelReason: 'Sebep',
     noLogs: 'Log bulunamadı.',
     logError: 'Log dosyası okunamadı.',
     pluginReloaded: 'Eklenti yenilendi.',
@@ -130,7 +132,8 @@ function buildCommands() {
       .addSubcommand(sc => sc.setName('menu').setDescription('Show command menu'))
       .addSubcommand(sc => sc.setName('mute').setDescription('Mute a player')
         .addStringOption(o => o.setName('player').setDescription('Player name').setRequired(true))
-        .addIntegerOption(o => o.setName('minutes').setDescription('Duration in minutes').setRequired(true)))
+        .addIntegerOption(o => o.setName('minutes').setDescription('Duration in minutes').setRequired(true))
+        .addStringOption(o => o.setName('reason').setDescription('Reason').setRequired(false)))
       .addSubcommand(sc => sc.setName('unmute').setDescription('Unmute a player')
         .addStringOption(o => o.setName('player').setDescription('Player name').setRequired(true)))
       .addSubcommand(sc => sc.setName('status').setDescription('Check mute status')
@@ -208,7 +211,10 @@ client.on('messageCreate', async (message) => {
     const count = parseInt(parts[1], 10) || 5;
     try {
       const logs = await fs.readJson(logFile);
-      const latest = logs.slice(-count).map(l => `${new Date(l.timestamp).toLocaleString()} - **${l.name}**: ${l.message}`).join('\n');
+      const latest = logs.slice(-count).map(l => {
+        const prefix = l.manual ? '[Manual] ' : '';
+        return `${new Date(l.timestamp).toLocaleString()} - **${l.name}**: ${prefix}${l.message}`;
+      }).join('\n');
       await message.channel.send({ content: latest || strings[lang].noLogs });
     } catch (err) {
       console.error('Failed to read log file', err);
@@ -253,7 +259,10 @@ client.on('interactionCreate', async (interaction) => {
     } else if (choice === 'logs') {
       const resp = await fetch(`${pluginUrl}/logs?count=5`);
       const logs = await resp.json();
-      const latest = logs.map(l => `${new Date(l.timestamp).toLocaleString()} - **${l.name}**: ${l.message}`).join('\n');
+      const latest = logs.map(l => {
+        const prefix = l.manual ? '[Manual] ' : '';
+        return `${new Date(l.timestamp).toLocaleString()} - **${l.name}**: ${prefix}${l.message}`;
+      }).join('\n');
       await interaction.reply({ content: latest || strings[lang].noLogs, ephemeral: true });
     } else if (choice === 'mute') {
       const modal = new ModalBuilder()
@@ -273,6 +282,13 @@ client.on('interactionCreate', async (interaction) => {
               .setLabel(strings[lang].labelMinutes)
               .setStyle(TextInputStyle.Short)
               .setRequired(true)
+          ),
+          new ActionRowBuilder().addComponents(
+            new TextInputBuilder()
+              .setCustomId('reason')
+              .setLabel(strings[lang].labelReason)
+              .setStyle(TextInputStyle.Short)
+              .setRequired(false)
           )
         );
       await interaction.showModal(modal);
@@ -311,10 +327,11 @@ client.on('interactionCreate', async (interaction) => {
     if (interaction.customId === 'cm-mute') {
       const player = interaction.fields.getTextInputValue('player');
       const minutes = parseInt(interaction.fields.getTextInputValue('minutes'), 10);
+      const reason = interaction.fields.getTextInputValue('reason');
       await fetch(`${pluginUrl}/mute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ player, minutes })
+        body: JSON.stringify({ player, minutes, reason })
       });
       await interaction.reply({ content: t('muted', player, minutes), ephemeral: true });
     } else if (interaction.customId === 'cm-unmute') {
@@ -339,7 +356,10 @@ client.on('interactionCreate', async (interaction) => {
     const count = interaction.options.getInteger('count') ?? 5;
     try {
       const logs = await fs.readJson(logFile);
-      const latest = logs.slice(-count).map(l => `${new Date(l.timestamp).toLocaleString()} - **${l.name}**: ${l.message}`).join('\n');
+      const latest = logs.slice(-count).map(l => {
+        const prefix = l.manual ? '[Manual] ' : '';
+        return `${new Date(l.timestamp).toLocaleString()} - **${l.name}**: ${prefix}${l.message}`;
+      }).join('\n');
       await interaction.reply({ content: latest || strings[lang].noLogs });
     } catch (err) {
       console.error('Failed to read log file', err);
@@ -364,10 +384,11 @@ client.on('interactionCreate', async (interaction) => {
     } else if (sub === 'mute') {
       const player = interaction.options.getString('player');
       const minutes = interaction.options.getInteger('minutes');
+      const reason = interaction.options.getString('reason') ?? '';
       await fetch(`${pluginUrl}/mute`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ player, minutes })
+        body: JSON.stringify({ player, minutes, reason })
       });
       await interaction.reply({ content: t('muted', player, minutes), ephemeral: true });
     } else if (sub === 'unmute') {

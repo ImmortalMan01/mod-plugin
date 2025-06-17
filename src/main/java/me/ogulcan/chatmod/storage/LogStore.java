@@ -47,7 +47,11 @@ public class LogStore {
     }
 
     public synchronized void add(UUID uuid, String name, String message) {
-        logs.add(new LogEntry(uuid, name, message, System.currentTimeMillis()));
+        add(uuid, name, message, false);
+    }
+
+    public synchronized void add(UUID uuid, String name, String message, boolean manual) {
+        logs.add(new LogEntry(uuid, name, message, System.currentTimeMillis(), manual));
         int max = plugin.getConfig().getInt("max-log-entries", 1000);
         if (max > 0) {
             while (logs.size() > max) {
@@ -110,12 +114,14 @@ public class LogStore {
         public String name;
         public String message;
         public long timestamp;
+        public boolean manual;
 
-        public LogEntry(UUID uuid, String name, String message, long timestamp) {
+        public LogEntry(UUID uuid, String name, String message, long timestamp, boolean manual) {
             this.uuid = uuid;
             this.name = name;
             this.message = message;
             this.timestamp = timestamp;
+            this.manual = manual;
         }
     }
 }

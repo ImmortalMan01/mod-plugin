@@ -60,7 +60,11 @@ public class LogsGUI implements Listener {
             meta.setDisplayName(ChatColor.YELLOW + entry.name);
             List<String> lore = new ArrayList<>();
             String msg = entry.message.length() > 30 ? entry.message.substring(0, 30) + "..." : entry.message;
-            lore.add(ChatColor.GRAY + msg);
+            if (entry.manual) {
+                lore.add(ChatColor.LIGHT_PURPLE + "[Manual] " + msg);
+            } else {
+                lore.add(ChatColor.GRAY + msg);
+            }
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
                     .withZone(ZoneId.systemDefault());
             lore.add(ChatColor.AQUA + fmt.format(Instant.ofEpochMilli(entry.timestamp)));
