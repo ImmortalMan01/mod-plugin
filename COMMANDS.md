@@ -2,8 +2,8 @@
 
 Aşağıdaki komutlar yalnızca `chatmoderation.command` yetkisine sahip oyuncular tarafından kullanılabilir.
 
-## /cm mute <oyuncu> <dakika>
-Belirtilen oyuncuyu verilen dakika süresince susturur. Örnek: `/cm mute Player 10` komutu Player adlı oyuncuyu 10 dakika susturur.
+## /cm mute <oyuncu> <dakika> [sebep]
+Belirtilen oyuncuyu verilen dakika süresince susturur. Opsiyonel bir sebep eklenebilir. Örnek: `/cm mute Player 10 Spam` komutu Player adlı oyuncuyu 10 dakika "Spam" sebebiyle susturur.
 
 ## /cm unmute <oyuncu>
 Belirtilen oyuncunun mevcut susturma cezasını kaldırır.

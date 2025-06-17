@@ -57,7 +57,10 @@ public class CmCommand implements CommandExecutor {
     }
 
     private boolean mute(CommandSender sender, String[] args) {
-        if (args.length < 2) return false;
+        if (args.length < 2) {
+            sender.sendMessage(plugin.getMessages().get("usage-mute"));
+            return true;
+        }
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
             sender.sendMessage(plugin.getMessages().get("player-not-found"));
@@ -82,7 +85,10 @@ public class CmCommand implements CommandExecutor {
     }
 
     private boolean unmute(CommandSender sender, String[] args) {
-        if (args.length < 1) return false;
+        if (args.length < 1) {
+            sender.sendMessage(plugin.getMessages().get("usage-unmute"));
+            return true;
+        }
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
             sender.sendMessage(plugin.getMessages().get("player-not-found"));
@@ -95,7 +101,10 @@ public class CmCommand implements CommandExecutor {
     }
 
     private boolean status(CommandSender sender, String[] args) {
-        if (args.length < 1) return false;
+        if (args.length < 1) {
+            sender.sendMessage(plugin.getMessages().get("usage-status"));
+            return true;
+        }
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
             sender.sendMessage(plugin.getMessages().get("player-not-found"));
