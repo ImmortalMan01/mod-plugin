@@ -25,13 +25,16 @@ public class DiscordNotifier {
      * @param reason muted message
      * @param remaining remaining minutes
      */
-    public void notifyMute(String player, String reason, long remaining) {
+    public void notifyMute(String player, String reason, long remaining, String actor, String type, long timestamp) {
         if (url.isEmpty()) return;
         RequestBody body = RequestBody.create(
                 gson.toJson(Map.of(
                         "player", player,
                         "reason", reason,
-                        "remaining", remaining
+                        "remaining", remaining,
+                        "actor", actor,
+                        "type", type,
+                        "timestamp", timestamp
                 )),
                 MediaType.parse("application/json")
         );

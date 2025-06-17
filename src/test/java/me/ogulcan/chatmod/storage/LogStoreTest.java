@@ -38,7 +38,7 @@ public class LogStoreTest {
     public void testDeferredSave() throws Exception {
         File file = new File(tempDir, "logs.json");
         LogStore store = new LogStore(plugin, file);
-        store.add(UUID.randomUUID(), "Bob", "hello");
+        store.add(UUID.randomUUID(), "Bob", "hello", "game", "Tester", 5);
         assertFalse(file.exists() && file.length() > 0);
         MockBukkit.getMock().getScheduler().performTicks(80L);
         MockBukkit.getMock().getScheduler().waitAsyncTasksFinished();
@@ -52,7 +52,7 @@ public class LogStoreTest {
         File file = new File(tempDir, "logs_custom.json");
         plugin.getConfig().set("save-interval-ticks", 20);
         LogStore store = new LogStore(plugin, file);
-        store.add(UUID.randomUUID(), "Alice", "hi");
+        store.add(UUID.randomUUID(), "Alice", "hi", "game", "Tester", 5);
         MockBukkit.getMock().getScheduler().performTicks(25L);
         MockBukkit.getMock().getScheduler().waitAsyncTasksFinished();
         assertTrue(file.exists() && file.length() > 0);
