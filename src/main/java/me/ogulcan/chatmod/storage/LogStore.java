@@ -32,6 +32,12 @@ public class LogStore {
 
     public synchronized void add(UUID uuid, String name, String message) {
         logs.add(new LogEntry(uuid, name, message, System.currentTimeMillis()));
+        int max = plugin.getConfig().getInt("max-log-entries", 1000);
+        if (max > 0) {
+            while (logs.size() > max) {
+                logs.remove(0);
+            }
+        }
         saveAsync();
     }
 
