@@ -3,6 +3,8 @@ package me.ogulcan.chatmod.service;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import okhttp3.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import org.bukkit.Bukkit;
 
 import java.io.IOException;
@@ -33,6 +35,8 @@ public class ModerationService {
     private final boolean enabled;
     private final boolean debug;
     private final String systemPrompt;
+    private final long cacheMillis;
+    private final ConcurrentMap<String, CacheEntry> cache = new ConcurrentHashMap<>();
     private Instant window = Instant.now();
     private int count = 0;
 
@@ -46,7 +50,7 @@ public class ModerationService {
 
     public ModerationService(String apiKey, String model, double threshold, int rateLimit,
                              Logger logger, boolean debug, String systemPrompt,
-                             String reasoningEffort, OkHttpClient client) {
+                             String reasoningEffort, long cacheMinutes, OkHttpClient client) {
         this.client = client;
         this.apiKey = apiKey;
         this.model = (model == null || model.isBlank()) ? DEFAULT_MODEL : model;
@@ -62,6 +66,7 @@ public class ModerationService {
         this.rateLimit = rateLimit;
         this.logger = logger;
         this.debug = debug;
+        this.cacheMillis = Math.max(0, cacheMinutes) * 60_000L;
         this.enabled = apiKey != null && !apiKey.isBlank() && !"REPLACE_ME".equals(apiKey);
         if (!enabled) {
             logger.warning("OpenAI API key missing or not set. Moderation requests will be skipped.");
@@ -87,6 +92,14 @@ public class ModerationService {
     }
 
     public CompletableFuture<Result> moderate(String message) {
+        String normalized = WordFilter.normalize(message);
+        CacheEntry entry = cache.get(normalized);
+        if (entry != null && entry.expiry > System.currentTimeMillis()) {
+            return CompletableFuture.completedFuture(entry.result);
+        } else if (entry != null) {
+            cache.remove(normalized);
+        }
+
         CompletableFuture<Result> future = new CompletableFuture<>();
         if (!enabled) {
             future.complete(new Result(false, false, new HashMap<>()));
@@ -100,14 +113,14 @@ public class ModerationService {
             logger.info("Moderating message: " + message);
         }
         if (chatModel) {
-            client.dispatcher().executorService().execute(() -> sendChatRequest(message, future, 0));
+            client.dispatcher().executorService().execute(() -> sendChatRequest(message, normalized, future, 0));
         } else {
-            client.dispatcher().executorService().execute(() -> sendRequest(message, future, 0));
+            client.dispatcher().executorService().execute(() -> sendRequest(message, normalized, future, 0));
         }
         return future;
     }
 
-    private void sendRequest(String message, CompletableFuture<Result> future, int attempt) {
+    private void sendRequest(String message, String normalized, CompletableFuture<Result> future, int attempt) {
         RequestBody body = RequestBody.create(gson.toJson(new Payload(message)), MediaType.parse("application/json"));
         Request request = new Request.Builder()
                 .url(getUrl())
@@ -123,7 +136,7 @@ public class ModerationService {
                 }
                 if (attempt < 2) {
                     CompletableFuture.delayedExecutor(1L << attempt, java.util.concurrent.TimeUnit.SECONDS, client.dispatcher().executorService())
-                            .execute(() -> sendRequest(message, future, attempt + 1));
+                            .execute(() -> sendRequest(message, normalized, future, attempt + 1));
                 } else {
                     future.complete(new Result(false, false, new HashMap<>()));
                 }
@@ -135,7 +148,7 @@ public class ModerationService {
                     if (!response.isSuccessful()) {
                         if ((response.code() == 429 || response.code() >= 500) && attempt < 2) {
                             CompletableFuture.delayedExecutor(1L << attempt, java.util.concurrent.TimeUnit.SECONDS, client.dispatcher().executorService())
-                                    .execute(() -> sendRequest(message, future, attempt + 1));
+                                    .execute(() -> sendRequest(message, normalized, future, attempt + 1));
                             return;
                         }
                         if (debug) {
@@ -166,13 +179,15 @@ public class ModerationService {
                     if (debug) {
                         logger.info("Trigger: " + trigger + ", blocked: " + r.blocked + ", scores: " + scores);
                     }
-                    future.complete(new Result(trigger, r.blocked, scores));
+                    Result res = new Result(trigger, r.blocked, scores);
+                    cache.put(normalized, new CacheEntry(res, System.currentTimeMillis() + cacheMillis));
+                    future.complete(res);
                 }
             }
         });
     }
 
-    private void sendChatRequest(String message, CompletableFuture<Result> future, int attempt) {
+    private void sendChatRequest(String message, String normalized, CompletableFuture<Result> future, int attempt) {
         RequestBody body = RequestBody.create(gson.toJson(new ChatPayload(message)), MediaType.parse("application/json"));
         Request request = new Request.Builder()
                 .url(getChatUrl())
@@ -188,7 +203,7 @@ public class ModerationService {
                 }
                 if (attempt < 2) {
                     CompletableFuture.delayedExecutor(1L << attempt, java.util.concurrent.TimeUnit.SECONDS, client.dispatcher().executorService())
-                            .execute(() -> sendChatRequest(message, future, attempt + 1));
+                            .execute(() -> sendChatRequest(message, normalized, future, attempt + 1));
                 } else {
                     future.complete(new Result(false, false, new HashMap<>()));
                 }
@@ -200,7 +215,7 @@ public class ModerationService {
                     if (!response.isSuccessful()) {
                         if ((response.code() == 429 || response.code() >= 500) && attempt < 2) {
                             CompletableFuture.delayedExecutor(1L << attempt, java.util.concurrent.TimeUnit.SECONDS, client.dispatcher().executorService())
-                                    .execute(() -> sendChatRequest(message, future, attempt + 1));
+                                    .execute(() -> sendChatRequest(message, normalized, future, attempt + 1));
                             return;
                         }
                         if (debug) {
@@ -221,7 +236,9 @@ public class ModerationService {
                     }
                     String content = cr.choices[0].message.content == null ? "" : cr.choices[0].message.content.trim().toLowerCase();
                     boolean trigger = content.startsWith("var");
-                    future.complete(new Result(trigger, trigger, new HashMap<>()));
+                    Result res = new Result(trigger, trigger, new HashMap<>());
+                    cache.put(normalized, new CacheEntry(res, System.currentTimeMillis() + cacheMillis));
+                    future.complete(res);
                 }
             }
         });
@@ -287,6 +304,15 @@ public class ModerationService {
             boolean blocked;
             @SerializedName("category_scores")
             Map<String, Double> categoryScores = new HashMap<>();
+        }
+    }
+
+    private static class CacheEntry {
+        final Result result;
+        final long expiry;
+        CacheEntry(Result result, long expiry) {
+            this.result = result;
+            this.expiry = expiry;
         }
     }
 

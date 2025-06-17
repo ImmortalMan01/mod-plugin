@@ -56,6 +56,7 @@ public class Main extends JavaPlugin {
         String model = getConfig().getString("model", "omni-moderation-latest");
         String prompt = getConfig().getString("chat-prompt", me.ogulcan.chatmod.service.ModerationService.DEFAULT_SYSTEM_PROMPT);
         String effort = getConfig().getString("thinking-effort", "medium");
+        long cacheMinutes = getConfig().getLong("moderation-cache-minutes", 5);
         boolean debug = getConfig().getBoolean("debug", false);
         String discordUrl = getConfig().getString("discord-url", "");
         int webPort = getConfig().getInt("web-port", 0);
@@ -64,7 +65,7 @@ public class Main extends JavaPlugin {
             getLogger().info("Debug mode enabled");
         }
         this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit,
-                this.getLogger(), debug, prompt, effort, httpClient);
+                this.getLogger(), debug, prompt, effort, cacheMinutes, httpClient);
         this.notifier = new DiscordNotifier(discordUrl, httpClient);
         this.store = new PunishmentStore(this, new File(getDataFolder(), "data/punishments.json"));
         this.logStore = new LogStore(this, new File(getDataFolder(), "data/logs.json"));
@@ -130,8 +131,9 @@ public class Main extends JavaPlugin {
         String discordUrl = getConfig().getString("discord-url", "");
         int webPort = getConfig().getInt("web-port", 0);
         int unmuteThreads = getConfig().getInt("unmute-threads", 10);
+        long cacheMinutes = getConfig().getLong("moderation-cache-minutes", 5);
         this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit,
-                this.getLogger(), debug, prompt, effort, httpClient);
+                this.getLogger(), debug, prompt, effort, cacheMinutes, httpClient);
         this.notifier = new DiscordNotifier(discordUrl, httpClient);
 
         if (webServer != null) {
