@@ -62,8 +62,8 @@ public class Main extends JavaPlugin {
         }
         this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug, prompt, effort);
         this.notifier = new DiscordNotifier(discordUrl);
-        this.store = new PunishmentStore(new File(getDataFolder(), "data/punishments.json"));
-        this.logStore = new LogStore(new File(getDataFolder(), "data/logs.json"));
+        this.store = new PunishmentStore(this, new File(getDataFolder(), "data/punishments.json"));
+        this.logStore = new LogStore(this, new File(getDataFolder(), "data/logs.json"));
         if (webPort > 0) {
             try {
                 this.webServer = new UnmuteServer(this, webPort);

@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.FileReader;
@@ -14,10 +15,12 @@ import java.util.*;
 
 public class PunishmentStore {
     private final File file;
+    private final JavaPlugin plugin;
     private final Gson gson = new Gson();
     private Map<UUID, Offender> offenders = new HashMap<>();
 
-    public PunishmentStore(File file) {
+    public PunishmentStore(JavaPlugin plugin, File file) {
+        this.plugin = plugin;
         this.file = file;
         if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
         load();
@@ -29,7 +32,7 @@ public class PunishmentStore {
         offender.pausedRemaining = 0;
         offender.offences.add(System.currentTimeMillis());
         offenders.put(uuid, offender);
-        save();
+        saveAsync();
     }
 
     public synchronized void unmute(UUID uuid) {
@@ -37,7 +40,7 @@ public class PunishmentStore {
         if (offender != null) {
             offender.muteUntil = 0;
             offender.pausedRemaining = 0;
-            save();
+            saveAsync();
         }
     }
 
@@ -49,7 +52,7 @@ public class PunishmentStore {
         }
         if (offender.muteUntil <= System.currentTimeMillis()) {
             offender.muteUntil = 0;
-            save();
+            saveAsync();
             return false;
         }
         return true;
@@ -68,7 +71,7 @@ public class PunishmentStore {
         if (offender.muteUntil > System.currentTimeMillis()) {
             offender.pausedRemaining = offender.muteUntil - System.currentTimeMillis();
             offender.muteUntil = 0;
-            save();
+            saveAsync();
         }
     }
 
@@ -78,7 +81,7 @@ public class PunishmentStore {
         if (offender.pausedRemaining > 0) {
             offender.muteUntil = System.currentTimeMillis() + offender.pausedRemaining;
             offender.pausedRemaining = 0;
-            save();
+            saveAsync();
             return true;
         }
         return false;
@@ -100,7 +103,7 @@ public class PunishmentStore {
     /** Clears all stored offences and mute timers. */
     public synchronized void clear() {
         offenders.clear();
-        save();
+        saveAsync();
     }
 
     private void load() {
@@ -118,6 +121,11 @@ public class PunishmentStore {
         } catch (IOException e) {
             Bukkit.getLogger().warning("Could not save punishments: " + e.getMessage());
         }
+    }
+
+    /** Run {@code save()} asynchronously using the Bukkit scheduler. */
+    public void saveAsync() {
+        Bukkit.getScheduler().runTaskAsynchronously(plugin, this::save);
     }
 
     public static class Offender {
