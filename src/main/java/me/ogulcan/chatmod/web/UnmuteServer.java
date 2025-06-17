@@ -24,7 +24,8 @@ public class UnmuteServer {
         this.plugin = plugin;
         server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/unmute", new UnmuteHandler());
-        server.setExecutor(Executors.newSingleThreadExecutor());
+        // Use a cached thread pool so the server can handle multiple requests concurrently
+        server.setExecutor(Executors.newCachedThreadPool());
         server.start();
     }
 
