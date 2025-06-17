@@ -71,6 +71,10 @@ debug: false
 discord-url: "http://localhost:3000"
 web-port: 8081
 unmute-threads: 10
+http-connect-timeout: 10
+http-read-timeout: 10
+http-max-requests: 100
+http-max-requests-per-host: 100
 countdown-offline: true
 max-log-entries: 1000
 save-interval-ticks: 100

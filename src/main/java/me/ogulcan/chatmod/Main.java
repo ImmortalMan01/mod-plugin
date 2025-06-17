@@ -21,6 +21,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import okhttp3.OkHttpClient;
+import okhttp3.Dispatcher;
 
 public class Main extends JavaPlugin {
     private ModerationService moderationService;
@@ -28,7 +29,7 @@ public class Main extends JavaPlugin {
     private LogStore logStore;
     private DiscordNotifier notifier;
     private UnmuteServer webServer;
-    private final OkHttpClient httpClient = new OkHttpClient();
+    private OkHttpClient httpClient;
     private Messages messages;
     private FileConfiguration guiConfig;
     private boolean autoMute = true;
@@ -58,6 +59,18 @@ public class Main extends JavaPlugin {
         String effort = getConfig().getString("thinking-effort", "medium");
         long cacheMinutes = getConfig().getLong("moderation-cache-minutes", 5);
         boolean debug = getConfig().getBoolean("debug", false);
+        int connectTimeout = getConfig().getInt("http-connect-timeout", 10);
+        int readTimeout = getConfig().getInt("http-read-timeout", 10);
+        int maxRequests = getConfig().getInt("http-max-requests", 100);
+        int maxRequestsPerHost = getConfig().getInt("http-max-requests-per-host", 100);
+        Dispatcher dispatcher = new Dispatcher();
+        dispatcher.setMaxRequests(maxRequests);
+        dispatcher.setMaxRequestsPerHost(maxRequestsPerHost);
+        this.httpClient = new OkHttpClient.Builder()
+                .connectTimeout(connectTimeout, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(readTimeout, java.util.concurrent.TimeUnit.SECONDS)
+                .dispatcher(dispatcher)
+                .build();
         String discordUrl = getConfig().getString("discord-url", "");
         int webPort = getConfig().getInt("web-port", 0);
         int unmuteThreads = getConfig().getInt("unmute-threads", 10);
@@ -128,6 +141,18 @@ public class Main extends JavaPlugin {
         String prompt = getConfig().getString("chat-prompt", me.ogulcan.chatmod.service.ModerationService.DEFAULT_SYSTEM_PROMPT);
         String effort = getConfig().getString("thinking-effort", "medium");
         boolean debug = getConfig().getBoolean("debug", false);
+        int connectTimeout = getConfig().getInt("http-connect-timeout", 10);
+        int readTimeout = getConfig().getInt("http-read-timeout", 10);
+        int maxRequests = getConfig().getInt("http-max-requests", 100);
+        int maxRequestsPerHost = getConfig().getInt("http-max-requests-per-host", 100);
+        Dispatcher dispatcher = new Dispatcher();
+        dispatcher.setMaxRequests(maxRequests);
+        dispatcher.setMaxRequestsPerHost(maxRequestsPerHost);
+        this.httpClient = new OkHttpClient.Builder()
+                .connectTimeout(connectTimeout, java.util.concurrent.TimeUnit.SECONDS)
+                .readTimeout(readTimeout, java.util.concurrent.TimeUnit.SECONDS)
+                .dispatcher(dispatcher)
+                .build();
         String discordUrl = getConfig().getString("discord-url", "");
         int webPort = getConfig().getInt("web-port", 0);
         int unmuteThreads = getConfig().getInt("unmute-threads", 10);
