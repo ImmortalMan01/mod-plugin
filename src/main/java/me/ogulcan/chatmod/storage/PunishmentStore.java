@@ -26,6 +26,8 @@ public class PunishmentStore {
         this.file = file;
         if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
         load();
+        // All file writes are performed by this dedicated async task running on
+        // Bukkit's single async thread.
         this.task = new org.bukkit.scheduler.BukkitRunnable() {
             @Override
             public void run() {
@@ -136,9 +138,12 @@ public class PunishmentStore {
         }
     }
 
-    /** Run {@code save()} asynchronously using the Bukkit scheduler. */
+    /**
+     * Mark the store as dirty so the periodic async task will persist changes.
+     * All actual file writes occur on that dedicated thread.
+     */
     public void saveAsync() {
-        Bukkit.getScheduler().runTaskAsynchronously(plugin, this::save);
+        markDirty();
     }
 
     private synchronized void markDirty() {
