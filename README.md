@@ -133,6 +133,9 @@ paginated view of recent chat logs. Each entry displays the player's head, a
 snippet of the muted message and when it was recorded. These logs are stored in
 `data/logs.json` and persist even if the server runs in offline mode. You can
 remove all entries with the **Clear Logs** button or by running `/cm clearlogs`.
+The `max-log-entries` option in `config.yml` controls how many of these entries
+are kept (default `1000`). When the limit is exceeded, the oldest logs are
+discarded automatically.
 
 Use `/cm reload` to re-read all configuration files. OpenAI options such as
 `openai-key`, `model`, `threshold` and `rate-limit` are applied immediately and
