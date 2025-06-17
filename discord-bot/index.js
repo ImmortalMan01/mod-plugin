@@ -11,7 +11,8 @@ const {
   TextInputStyle,
   SlashCommandBuilder,
   REST,
-  Routes
+  Routes,
+  EmbedBuilder
 } = require('discord.js');
 const express = require('express');
 const fs = require('fs-extra');
@@ -447,8 +448,14 @@ app.post('/mute', async (req, res) => {
       );
       const date = new Date(timestamp || Date.now()).toLocaleString();
       const typeStr = strings[lang][`type_${type}`] || type;
-      const content = t('apiMute', typeStr, date, actor, player, remaining, reason);
-      await channel.send({ content, components: [row] });
+      const description = t('apiMute', typeStr, date, actor, player, remaining, reason);
+      const embed = new EmbedBuilder()
+        .setColor(0xff5555)
+        .setTitle('Mute Notice')
+        .setDescription(description)
+        .setThumbnail(`https://mc-heads.net/avatar/${player}`)
+        .setImage(`https://mc-heads.net/body/${player}`);
+      await channel.send({ embeds: [embed], components: [row] });
     }
     res.json({ ok: true });
   } catch (err) {
