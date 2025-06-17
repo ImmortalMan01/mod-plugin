@@ -73,6 +73,7 @@ web-port: 8081
 unmute-threads: 10
 countdown-offline: true
 max-log-entries: 1000
+save-interval-ticks: 100
 use-blocked-categories: true
 use-blocked-words: FALSE
 blocked-words:

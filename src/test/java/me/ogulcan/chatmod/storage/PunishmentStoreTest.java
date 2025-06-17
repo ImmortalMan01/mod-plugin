@@ -46,4 +46,16 @@ public class PunishmentStoreTest {
         store.close();
         assertTrue(file.exists() && file.length() > 0);
     }
+
+    @Test
+    public void testCustomInterval() throws Exception {
+        File file = new File(tempDir, "punish_custom.json");
+        plugin.getConfig().set("save-interval-ticks", 20);
+        PunishmentStore store = new PunishmentStore(plugin, file);
+        store.mute(UUID.randomUUID(), 5);
+        MockBukkit.getMock().getScheduler().performTicks(25L);
+        MockBukkit.getMock().getScheduler().waitAsyncTasksFinished();
+        assertTrue(file.exists() && file.length() > 0);
+        store.close();
+    }
 }

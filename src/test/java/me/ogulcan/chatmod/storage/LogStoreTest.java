@@ -46,4 +46,16 @@ public class LogStoreTest {
         store.close();
         assertTrue(file.exists() && file.length() > 0);
     }
+
+    @Test
+    public void testCustomInterval() throws Exception {
+        File file = new File(tempDir, "logs_custom.json");
+        plugin.getConfig().set("save-interval-ticks", 20);
+        LogStore store = new LogStore(plugin, file);
+        store.add(UUID.randomUUID(), "Alice", "hi");
+        MockBukkit.getMock().getScheduler().performTicks(25L);
+        MockBukkit.getMock().getScheduler().waitAsyncTasksFinished();
+        assertTrue(file.exists() && file.length() > 0);
+        store.close();
+    }
 }

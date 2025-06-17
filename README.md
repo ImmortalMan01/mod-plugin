@@ -139,6 +139,8 @@ remove all entries with the **Clear Logs** button or by running `/cm clearlogs`.
 The `max-log-entries` option in `config.yml` controls how many of these entries
 are kept (default `1000`). When the limit is exceeded, the oldest logs are
 discarded automatically.
+The `save-interval-ticks` option determines how often punishment and log files
+are persisted (default `100` ticks).
 
 Use `/cm reload` to re-read all configuration files. OpenAI options such as
 `openai-key`, `model`, `threshold` and `rate-limit` are applied immediately and
