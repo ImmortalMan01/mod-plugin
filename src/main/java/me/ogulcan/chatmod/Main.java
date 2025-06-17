@@ -59,6 +59,7 @@ public class Main extends JavaPlugin {
         boolean debug = getConfig().getBoolean("debug", false);
         String discordUrl = getConfig().getString("discord-url", "");
         int webPort = getConfig().getInt("web-port", 0);
+        int unmuteThreads = getConfig().getInt("unmute-threads", 10);
         if (debug) {
             getLogger().info("Debug mode enabled");
         }
@@ -69,7 +70,7 @@ public class Main extends JavaPlugin {
         this.logStore = new LogStore(this, new File(getDataFolder(), "data/logs.json"));
         if (webPort > 0) {
             try {
-                this.webServer = new UnmuteServer(this, webPort);
+                this.webServer = new UnmuteServer(this, webPort, unmuteThreads);
                 getLogger().info("Web server running on port " + webPort);
             } catch (Exception e) {
                 getLogger().warning("Failed to start web server: " + e.getMessage());
@@ -128,6 +129,7 @@ public class Main extends JavaPlugin {
         boolean debug = getConfig().getBoolean("debug", false);
         String discordUrl = getConfig().getString("discord-url", "");
         int webPort = getConfig().getInt("web-port", 0);
+        int unmuteThreads = getConfig().getInt("unmute-threads", 10);
         this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit,
                 this.getLogger(), debug, prompt, effort, httpClient);
         this.notifier = new DiscordNotifier(discordUrl, httpClient);
@@ -138,7 +140,7 @@ public class Main extends JavaPlugin {
         }
         if (webPort > 0) {
             try {
-                webServer = new UnmuteServer(this, webPort);
+                webServer = new UnmuteServer(this, webPort, unmuteThreads);
                 getLogger().info("Web server running on port " + webPort);
             } catch (Exception e) {
                 getLogger().warning("Failed to start web server: " + e.getMessage());
