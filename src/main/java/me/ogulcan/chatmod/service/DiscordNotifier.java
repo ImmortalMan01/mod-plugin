@@ -11,11 +11,12 @@ import java.util.Map;
  */
 public class DiscordNotifier {
     private final String url;
-    private final OkHttpClient client = new OkHttpClient();
+    private final OkHttpClient client;
     private final Gson gson = new Gson();
 
-    public DiscordNotifier(String url) {
+    public DiscordNotifier(String url, OkHttpClient client) {
         this.url = url == null ? "" : url.trim();
+        this.client = client;
     }
 
     /**

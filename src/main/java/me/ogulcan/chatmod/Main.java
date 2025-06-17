@@ -20,6 +20,7 @@ import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
+import okhttp3.OkHttpClient;
 
 public class Main extends JavaPlugin {
     private ModerationService moderationService;
@@ -27,6 +28,7 @@ public class Main extends JavaPlugin {
     private LogStore logStore;
     private DiscordNotifier notifier;
     private UnmuteServer webServer;
+    private final OkHttpClient httpClient = new OkHttpClient();
     private Messages messages;
     private FileConfiguration guiConfig;
     private boolean autoMute = true;
@@ -60,8 +62,9 @@ public class Main extends JavaPlugin {
         if (debug) {
             getLogger().info("Debug mode enabled");
         }
-        this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug, prompt, effort);
-        this.notifier = new DiscordNotifier(discordUrl);
+        this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit,
+                this.getLogger(), debug, prompt, effort, httpClient);
+        this.notifier = new DiscordNotifier(discordUrl, httpClient);
         this.store = new PunishmentStore(this, new File(getDataFolder(), "data/punishments.json"));
         this.logStore = new LogStore(this, new File(getDataFolder(), "data/logs.json"));
         if (webPort > 0) {
@@ -125,8 +128,9 @@ public class Main extends JavaPlugin {
         boolean debug = getConfig().getBoolean("debug", false);
         String discordUrl = getConfig().getString("discord-url", "");
         int webPort = getConfig().getInt("web-port", 0);
-        this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit, this.getLogger(), debug, prompt, effort);
-        this.notifier = new DiscordNotifier(discordUrl);
+        this.moderationService = new ModerationService(apiKey, model, threshold, rateLimit,
+                this.getLogger(), debug, prompt, effort, httpClient);
+        this.notifier = new DiscordNotifier(discordUrl, httpClient);
 
         if (webServer != null) {
             webServer.stop();

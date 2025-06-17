@@ -20,7 +20,7 @@ public class ModerationService {
     private static final String DEFAULT_MODEL = "omni-moderation-latest";
     public static final String DEFAULT_SYSTEM_PROMPT =
             "Sen minecraft sohbet moderatörüsün. Görevin Türkçe cümlede küfür veya hakaret varsa sadece var yoksa yok yaz (lan, altıma sıçtım gibi basit argo kelimeleri ve lezyiyen gibi nicknameleri ve minecraft sunucularında kullanılan terimleri görmezden gel sadece kullanıcıların birbirlerine doğrudan küfür ve hakaret emlerine izin vermeyeceksin) (kullanıcı küfürü gizlemek için özel karakterler veya sansürler kullanmış olabilir dikkat et):";
-    private final OkHttpClient client = new OkHttpClient();
+    private final OkHttpClient client;
     private final Gson gson = new Gson();
     private final String apiKey;
     private final double threshold;
@@ -45,7 +45,9 @@ public class ModerationService {
     }
 
     public ModerationService(String apiKey, String model, double threshold, int rateLimit,
-                             Logger logger, boolean debug, String systemPrompt, String reasoningEffort) {
+                             Logger logger, boolean debug, String systemPrompt,
+                             String reasoningEffort, OkHttpClient client) {
+        this.client = client;
         this.apiKey = apiKey;
         this.model = (model == null || model.isBlank()) ? DEFAULT_MODEL : model;
         this.chatModel = "gpt-4.1-mini".equalsIgnoreCase(this.model) ||
