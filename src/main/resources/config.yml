@@ -69,6 +69,7 @@ rate-limit: 250
 debug: false
 discord-url: "http://localhost:3000"
 web-port: 8081
+unmute-threads: 10
 countdown-offline: true
 max-log-entries: 1000
 use-blocked-categories: true

@@ -20,12 +20,12 @@ public class UnmuteServer {
     private final Gson gson = new Gson();
     private final Main plugin;
 
-    public UnmuteServer(Main plugin, int port) throws IOException {
+    public UnmuteServer(Main plugin, int port, int threads) throws IOException {
         this.plugin = plugin;
         server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/unmute", new UnmuteHandler());
-        // Use a cached thread pool so the server can handle multiple requests concurrently
-        server.setExecutor(Executors.newCachedThreadPool());
+        // Use a fixed thread pool to handle concurrent requests
+        server.setExecutor(Executors.newFixedThreadPool(threads));
         server.start();
     }
 
