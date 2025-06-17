@@ -115,7 +115,7 @@ public class ChatListener implements Listener {
                     .forEach(p -> p.sendMessage(msg));
         }
         store.mute(uuid, minutes);
-        logStore.add(uuid, player.getName(), message);
+        logStore.add(uuid, player.getName(), message, false);
         plugin.scheduleUnmute(uuid, minutes * 60L * 20L);
         player.sendMessage(plugin.getMessages().get("muted-player", minutes));
 

@@ -84,6 +84,7 @@ public class UnmuteServer {
             Map<?, ?> data = gson.fromJson(body, Map.class);
             String player = data == null ? null : (String) data.get("player");
             Number minutes = data == null ? null : (Number) data.get("minutes");
+            String reason = data == null ? null : (String) data.get("reason");
             if (player == null || minutes == null) {
                 byte[] resp = "{\"error\":\"Missing fields\"}".getBytes(StandardCharsets.UTF_8);
                 exchange.sendResponseHeaders(400, resp.length);
@@ -94,6 +95,8 @@ public class UnmuteServer {
             Bukkit.getScheduler().runTask(plugin, () -> {
                 OfflinePlayer off = Bukkit.getOfflinePlayer(player);
                 plugin.getStore().mute(off.getUniqueId(), min);
+                plugin.getLogStore().add(off.getUniqueId(), player, reason == null || reason.isBlank() ? "manual" : reason, true);
+                plugin.getNotifier().notifyMute(player, reason == null || reason.isBlank() ? "manual" : reason, min);
                 plugin.scheduleUnmute(off.getUniqueId(), min * 60L * 20L);
             });
             byte[] resp = "{\"ok\":true}".getBytes(StandardCharsets.UTF_8);

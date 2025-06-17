@@ -109,6 +109,10 @@ public class Main extends JavaPlugin {
         return messages;
     }
 
+    public DiscordNotifier getNotifier() {
+        return notifier;
+    }
+
     public FileConfiguration getGuiConfig() {
         return guiConfig;
     }

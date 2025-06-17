@@ -70,7 +70,10 @@ public class CmCommand implements CommandExecutor {
             sender.sendMessage(plugin.getMessages().get("invalid-minutes"));
             return true;
         }
+        String reason = args.length > 2 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : "";
         store.mute(target.getUniqueId(), minutes);
+        plugin.getLogStore().add(target.getUniqueId(), target.getName(), reason.isBlank() ? "manual" : reason, true);
+        plugin.getNotifier().notifyMute(target.getName(), reason.isBlank() ? "manual" : reason, minutes);
         plugin.scheduleUnmute(target.getUniqueId(), minutes * 60L * 20L);
         sender.sendMessage(plugin.getMessages().get("muted", target.getName(), minutes));
         return true;
