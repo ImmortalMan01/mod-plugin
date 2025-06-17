@@ -21,6 +21,8 @@ public class LogStore {
     private final File file;
     private final JavaPlugin plugin;
     private final Gson gson = new Gson();
+    private boolean dirty = false;
+    private final org.bukkit.scheduler.BukkitTask task;
     private List<LogEntry> logs = new ArrayList<>();
 
     public LogStore(JavaPlugin plugin, File file) {
@@ -28,6 +30,17 @@ public class LogStore {
         this.file = file;
         if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
         load();
+        this.task = new org.bukkit.scheduler.BukkitRunnable() {
+            @Override
+            public void run() {
+                synchronized (LogStore.this) {
+                    if (dirty) {
+                        dirty = false;
+                        save();
+                    }
+                }
+            }
+        }.runTaskTimerAsynchronously(plugin, 100L, 100L);
     }
 
     public synchronized void add(UUID uuid, String name, String message) {
@@ -38,7 +51,7 @@ public class LogStore {
                 logs.remove(0);
             }
         }
-        saveAsync();
+        markDirty();
     }
 
     /** Returns a copy of all logs in chronological order. */
@@ -49,7 +62,7 @@ public class LogStore {
     /** Remove all log entries from memory and disk. */
     public synchronized void clear() {
         logs.clear();
-        saveAsync();
+        markDirty();
     }
 
     private void load() {
@@ -72,6 +85,18 @@ public class LogStore {
     /** Run {@code save()} asynchronously using the Bukkit scheduler. */
     public void saveAsync() {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, this::save);
+    }
+
+    private synchronized void markDirty() {
+        dirty = true;
+    }
+
+    public synchronized void close() {
+        task.cancel();
+        if (dirty) {
+            save();
+            dirty = false;
+        }
     }
 
     public static class LogEntry {
