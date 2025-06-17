@@ -17,6 +17,8 @@ public class PunishmentStore {
     private final File file;
     private final JavaPlugin plugin;
     private final Gson gson = new Gson();
+    private boolean dirty = false;
+    private final org.bukkit.scheduler.BukkitTask task;
     private Map<UUID, Offender> offenders = new HashMap<>();
 
     public PunishmentStore(JavaPlugin plugin, File file) {
@@ -24,6 +26,17 @@ public class PunishmentStore {
         this.file = file;
         if (!file.getParentFile().exists()) file.getParentFile().mkdirs();
         load();
+        this.task = new org.bukkit.scheduler.BukkitRunnable() {
+            @Override
+            public void run() {
+                synchronized (PunishmentStore.this) {
+                    if (dirty) {
+                        dirty = false;
+                        save();
+                    }
+                }
+            }
+        }.runTaskTimerAsynchronously(plugin, 100L, 100L);
     }
 
     public synchronized void mute(UUID uuid, long durationMinutes) {
@@ -32,7 +45,7 @@ public class PunishmentStore {
         offender.pausedRemaining = 0;
         offender.offences.add(System.currentTimeMillis());
         offenders.put(uuid, offender);
-        saveAsync();
+        markDirty();
     }
 
     public synchronized void unmute(UUID uuid) {
@@ -40,7 +53,7 @@ public class PunishmentStore {
         if (offender != null) {
             offender.muteUntil = 0;
             offender.pausedRemaining = 0;
-            saveAsync();
+            markDirty();
         }
     }
 
@@ -52,7 +65,7 @@ public class PunishmentStore {
         }
         if (offender.muteUntil <= System.currentTimeMillis()) {
             offender.muteUntil = 0;
-            saveAsync();
+            markDirty();
             return false;
         }
         return true;
@@ -71,7 +84,7 @@ public class PunishmentStore {
         if (offender.muteUntil > System.currentTimeMillis()) {
             offender.pausedRemaining = offender.muteUntil - System.currentTimeMillis();
             offender.muteUntil = 0;
-            saveAsync();
+            markDirty();
         }
     }
 
@@ -81,7 +94,7 @@ public class PunishmentStore {
         if (offender.pausedRemaining > 0) {
             offender.muteUntil = System.currentTimeMillis() + offender.pausedRemaining;
             offender.pausedRemaining = 0;
-            saveAsync();
+            markDirty();
             return true;
         }
         return false;
@@ -103,7 +116,7 @@ public class PunishmentStore {
     /** Clears all stored offences and mute timers. */
     public synchronized void clear() {
         offenders.clear();
-        saveAsync();
+        markDirty();
     }
 
     private void load() {
@@ -126,6 +139,18 @@ public class PunishmentStore {
     /** Run {@code save()} asynchronously using the Bukkit scheduler. */
     public void saveAsync() {
         Bukkit.getScheduler().runTaskAsynchronously(plugin, this::save);
+    }
+
+    private synchronized void markDirty() {
+        dirty = true;
+    }
+
+    public synchronized void close() {
+        task.cancel();
+        if (dirty) {
+            save();
+            dirty = false;
+        }
     }
 
     public static class Offender {

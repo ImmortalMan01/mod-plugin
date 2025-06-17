@@ -153,6 +153,12 @@ public class Main extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        if (store != null) {
+            store.close();
+        }
+        if (logStore != null) {
+            logStore.close();
+        }
         if (webServer != null) {
             webServer.stop();
             webServer = null;
