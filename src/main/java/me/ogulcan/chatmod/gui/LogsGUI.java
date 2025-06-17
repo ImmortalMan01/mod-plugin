@@ -48,7 +48,7 @@ public class LogsGUI implements Listener {
         int total = (all.size() + PAGE_SIZE - 1) / PAGE_SIZE;
         if (total == 0) total = 1;
         this.page = Math.max(0, Math.min(p, total - 1));
-        String title = ChatColor.BLUE + "Logs " + (page + 1) + "/" + total;
+        String title = plugin.getMessages().get("logs-title", page + 1, total);
         inventory = Bukkit.createInventory(null, 54, title);
         int start = page * PAGE_SIZE;
         for (int i = 0; i < PAGE_SIZE && start + i < all.size(); i++) {
@@ -61,9 +61,9 @@ public class LogsGUI implements Listener {
             List<String> lore = new ArrayList<>();
             String msg = entry.reason.length() > 30 ? entry.reason.substring(0, 30) + "..." : entry.reason;
             String type = switch (entry.type) {
-                case "game" -> ChatColor.LIGHT_PURPLE + "[Game] ";
-                case "discord" -> ChatColor.DARK_PURPLE + "[Discord] ";
-                default -> ChatColor.GRAY + "[Auto] ";
+                case "game" -> plugin.getMessages().get("log-type-game");
+                case "discord" -> plugin.getMessages().get("log-type-discord");
+                default -> plugin.getMessages().get("log-type-auto");
             };
             lore.add(type + msg);
             lore.add(ChatColor.GREEN + entry.actor + " - " + entry.duration + "m");
@@ -74,8 +74,8 @@ public class LogsGUI implements Listener {
             head.setItemMeta(meta);
             inventory.setItem(i, head);
         }
-        if (page > 0) inventory.setItem(45, item(Material.ARROW, ChatColor.GREEN + "Prev"));
-        if (start + PAGE_SIZE < all.size()) inventory.setItem(53, item(Material.ARROW, ChatColor.GREEN + "Next"));
+        if (page > 0) inventory.setItem(45, item(Material.ARROW, plugin.getMessages().get("logs-prev")));
+        if (start + PAGE_SIZE < all.size()) inventory.setItem(53, item(Material.ARROW, plugin.getMessages().get("logs-next")));
         openingNew = true;
         viewer.openInventory(inventory);
     }
