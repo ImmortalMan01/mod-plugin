@@ -59,17 +59,21 @@ public class LogsGUI implements Listener {
             meta.setOwningPlayer(op);
             meta.setDisplayName(ChatColor.YELLOW + entry.name);
             List<String> lore = new ArrayList<>();
-            String msg = entry.reason.length() > 30 ? entry.reason.substring(0, 30) + "..." : entry.reason;
-            String type = switch (entry.type) {
-                case "game" -> plugin.getMessages().get("log-type-game");
-                case "discord" -> plugin.getMessages().get("log-type-discord");
-                default -> plugin.getMessages().get("log-type-auto");
+            String typeName = switch (entry.type) {
+                case "game" -> plugin.getMessages().get("log-type-game-full");
+                case "discord" -> plugin.getMessages().get("log-type-discord-full");
+                default -> plugin.getMessages().get("log-type-auto-full");
             };
-            lore.add(type + msg);
-            lore.add(ChatColor.GREEN + entry.actor + " - " + entry.duration + "m");
             DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm")
                     .withZone(ZoneId.systemDefault());
-            lore.add(ChatColor.AQUA + fmt.format(Instant.ofEpochMilli(entry.timestamp)));
+            String date = fmt.format(Instant.ofEpochMilli(entry.timestamp));
+            String reason = entry.reason.length() > 50 ? entry.reason.substring(0, 50) + "..." : entry.reason;
+            lore.add(plugin.getMessages().get("log-format-type", typeName));
+            lore.add(plugin.getMessages().get("log-format-date", date));
+            lore.add(plugin.getMessages().get("log-format-actor", entry.actor));
+            lore.add(plugin.getMessages().get("log-format-player", entry.name));
+            lore.add(plugin.getMessages().get("log-format-duration", entry.duration));
+            lore.add(plugin.getMessages().get("log-format-reason", reason));
             meta.setLore(lore);
             head.setItemMeta(meta);
             inventory.setItem(i, head);
