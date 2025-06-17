@@ -28,6 +28,7 @@ public class PunishmentStore {
         load();
         // All file writes are performed by this dedicated async task running on
         // Bukkit's single async thread.
+        long interval = plugin.getConfig().getLong("save-interval-ticks", 100L);
         this.task = new org.bukkit.scheduler.BukkitRunnable() {
             @Override
             public void run() {
@@ -38,7 +39,7 @@ public class PunishmentStore {
                     }
                 }
             }
-        }.runTaskTimerAsynchronously(plugin, 100L, 100L);
+        }.runTaskTimerAsynchronously(plugin, interval, interval);
     }
 
     public synchronized void mute(UUID uuid, long durationMinutes) {
