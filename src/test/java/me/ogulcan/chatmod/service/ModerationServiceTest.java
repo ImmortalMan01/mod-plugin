@@ -23,7 +23,8 @@ public class ModerationServiceTest {
         server.start();
         service = new ModerationService("test", "omni-moderation-latest", 0.5, 60,
                 java.util.logging.Logger.getAnonymousLogger(), false,
-                ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", new okhttp3.OkHttpClient()) {
+                ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", 10,
+                new okhttp3.OkHttpClient()) {
             @Override
             protected String getUrl() { return server.url("/v1/moderations").toString(); }
             @Override
@@ -68,7 +69,8 @@ public class ModerationServiceTest {
     public void testRateLimit() throws Exception {
         service = new ModerationService("test", "omni-moderation-latest", 0.5, 1,
                 java.util.logging.Logger.getAnonymousLogger(), false,
-                ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", new okhttp3.OkHttpClient()) {
+                ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", 10,
+                new okhttp3.OkHttpClient()) {
             @Override
             protected String getUrl() { return server.url("/v1/moderations").toString(); }
         };
@@ -90,7 +92,8 @@ public class ModerationServiceTest {
     public void testDisabledWhenNoApiKey() throws Exception {
         ModerationService disabled = new ModerationService("", "omni-moderation-latest", 0.5, 60,
                 java.util.logging.Logger.getAnonymousLogger(), false,
-                ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", new okhttp3.OkHttpClient());
+                ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", 10,
+                new okhttp3.OkHttpClient());
         ModerationService.Result r = disabled.moderate("whatever").get();
         assertFalse(r.triggered);
     }
@@ -99,7 +102,8 @@ public class ModerationServiceTest {
     public void testChatModelTriggered() throws Exception {
         service = new ModerationService("test", "gpt-4.1-mini", 0.5, 60,
                 java.util.logging.Logger.getAnonymousLogger(), false,
-                ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", new okhttp3.OkHttpClient()) {
+                ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", 10,
+                new okhttp3.OkHttpClient()) {
             @Override
             protected String getChatUrl() { return server.url("/v1/chat/completions").toString(); }
         };
@@ -112,7 +116,8 @@ public class ModerationServiceTest {
     public void testChatModelNotTriggered() throws Exception {
         service = new ModerationService("test", "gpt-4.1-mini", 0.5, 60,
                 java.util.logging.Logger.getAnonymousLogger(), false,
-                ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", new okhttp3.OkHttpClient()) {
+                ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", 10,
+                new okhttp3.OkHttpClient()) {
             @Override
             protected String getChatUrl() { return server.url("/v1/chat/completions").toString(); }
         };
@@ -123,7 +128,7 @@ public class ModerationServiceTest {
 
     @Test
     public void testChatModelTriggeredGpt41() throws Exception {
-        service = new ModerationService("test", "gpt-4.1", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", new okhttp3.OkHttpClient()) {
+        service = new ModerationService("test", "gpt-4.1", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", 10, new okhttp3.OkHttpClient()) {
             @Override
             protected String getChatUrl() { return server.url("/v1/chat/completions").toString(); }
         };
@@ -134,7 +139,7 @@ public class ModerationServiceTest {
 
     @Test
     public void testChatModelNotTriggeredGpt41() throws Exception {
-        service = new ModerationService("test", "gpt-4.1", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", new okhttp3.OkHttpClient()) {
+        service = new ModerationService("test", "gpt-4.1", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", 10, new okhttp3.OkHttpClient()) {
             @Override
             protected String getChatUrl() { return server.url("/v1/chat/completions").toString(); }
         };
@@ -145,7 +150,7 @@ public class ModerationServiceTest {
 
     @Test
     public void testChatModelTriggeredO3() throws Exception {
-        service = new ModerationService("test", "o3", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", new okhttp3.OkHttpClient()) {
+        service = new ModerationService("test", "o3", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", 10, new okhttp3.OkHttpClient()) {
             @Override
             protected String getChatUrl() { return server.url("/v1/chat/completions").toString(); }
         };
@@ -156,7 +161,7 @@ public class ModerationServiceTest {
 
     @Test
     public void testChatModelNotTriggeredO3() throws Exception {
-        service = new ModerationService("test", "o3", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", new okhttp3.OkHttpClient()) {
+        service = new ModerationService("test", "o3", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", 10, new okhttp3.OkHttpClient()) {
             @Override
             protected String getChatUrl() { return server.url("/v1/chat/completions").toString(); }
         };
@@ -167,7 +172,7 @@ public class ModerationServiceTest {
 
     @Test
     public void testChatModelTriggeredO4Mini() throws Exception {
-        service = new ModerationService("test", "o4-mini", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", new okhttp3.OkHttpClient()) {
+        service = new ModerationService("test", "o4-mini", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", 10, new okhttp3.OkHttpClient()) {
             @Override
             protected String getChatUrl() { return server.url("/v1/chat/completions").toString(); }
         };
@@ -178,13 +183,25 @@ public class ModerationServiceTest {
 
     @Test
     public void testChatModelNotTriggeredO4Mini() throws Exception {
-        service = new ModerationService("test", "o4-mini", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", new okhttp3.OkHttpClient()) {
+        service = new ModerationService("test", "o4-mini", 0.5, 60, java.util.logging.Logger.getAnonymousLogger(), false, ModerationService.DEFAULT_SYSTEM_PROMPT, "medium", 10, new okhttp3.OkHttpClient()) {
             @Override
             protected String getChatUrl() { return server.url("/v1/chat/completions").toString(); }
         };
         server.enqueue(new MockResponse().setBody(chatResponse("yok")));
         ModerationService.Result r = service.moderate("ok").get();
         assertFalse(r.triggered);
+    }
+
+    @Test
+    public void testCacheBypassesApi() throws Exception {
+        server.enqueue(new MockResponse().setBody(response(false, false, 0.1)));
+        ModerationService.Result r1 = service.moderate("hello").get();
+        assertFalse(r1.triggered);
+        assertEquals(1, server.getRequestCount());
+
+        ModerationService.Result r2 = service.moderate("Hello").get();
+        assertFalse(r2.triggered);
+        assertEquals(1, server.getRequestCount());
     }
 
     private String chatResponse(String text) {
