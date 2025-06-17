@@ -2,6 +2,7 @@ package me.ogulcan.chatmod.service;
 
 import org.junit.jupiter.api.Test;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -38,17 +39,17 @@ public class WordFilterTest {
 
     @Test
     public void testNormalizedWordList() {
-        List<String> words = List.of("orospu", "piç").stream()
+        Set<String> words = List.of("orospu", "piç").stream()
                 .map(WordFilter::normalize)
-                .toList();
+                .collect(java.util.stream.Collectors.toSet());
         assertTrue(WordFilter.containsBlockedWord("Sen bir orospu çocuğusun", words, true));
     }
 
     @Test
     public void testNormalizedWordListClean() {
-        List<String> words = List.of("orospu", "piç").stream()
+        Set<String> words = List.of("orospu", "piç").stream()
                 .map(WordFilter::normalize)
-                .toList();
+                .collect(java.util.stream.Collectors.toSet());
         assertFalse(WordFilter.containsBlockedWord("Merhaba nasılsın", words, true));
     }
 
