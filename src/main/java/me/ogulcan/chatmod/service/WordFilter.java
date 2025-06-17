@@ -18,7 +18,7 @@ public class WordFilter {
      * diacritics and converting punctuation to spaces. Multiple spaces are
      * collapsed to a single space and the result is trimmed.
      */
-    private static String normalize(String text) {
+    public static String normalize(String text) {
         if (text == null) return "";
         String lower = text.toLowerCase(Locale.ROOT)
                 .replace('ğ', 'g')
@@ -57,6 +57,43 @@ public class WordFilter {
         for (String token : words) {
             for (String w : blockedWords) {
                 if (token.contains(normalize(w))) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Variant of {@link #containsBlockedWord(String, List)} where the block list
+     * is already normalized. This avoids normalizing each word repeatedly.
+     */
+    public static boolean containsBlockedWord(String message, List<String> normalizedWords, boolean wordsNormalized) {
+        if (!wordsNormalized) {
+            return containsBlockedWord(message, normalizedWords);
+        }
+        if (message == null) return false;
+        String normalizedMessage = normalize(message);
+        String[] tokens = normalizedMessage.split(" ");
+
+        List<String> words = new java.util.ArrayList<>();
+        StringBuilder sb = new StringBuilder();
+        for (String t : tokens) {
+            if (t.length() <= 1) {
+                sb.append(t);
+            } else {
+                if (sb.length() > 0) {
+                    words.add(sb.toString());
+                    sb.setLength(0);
+                }
+                words.add(t);
+            }
+        }
+        if (sb.length() > 0) words.add(sb.toString());
+
+        for (String token : words) {
+            for (String w : normalizedWords) {
+                if (token.contains(w)) {
                     return true;
                 }
             }
