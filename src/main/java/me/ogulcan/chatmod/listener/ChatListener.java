@@ -116,7 +116,8 @@ public class ChatListener implements Listener {
         }
         store.mute(uuid, minutes);
         String sys = plugin.getMessages().get("system-name");
-        logStore.add(uuid, player.getName(), "Otomatik Tespit", "auto", sys, minutes);
+        String autoReason = plugin.getMessages().get("auto-detection");
+        logStore.add(uuid, player.getName(), autoReason, "auto", sys, minutes);
         plugin.scheduleUnmute(uuid, minutes * 60L * 20L);
         player.sendMessage(plugin.getMessages().get("muted-player", minutes));
 
@@ -132,7 +133,7 @@ public class ChatListener implements Listener {
         );
         Bukkit.broadcastMessage(broadcast);
 
-        notifier.notifyMute(player.getName(), "Otomatik Tespit", minutes, sys, "auto", System.currentTimeMillis());
+        notifier.notifyMute(player.getName(), autoReason, minutes, sys, "auto", System.currentTimeMillis());
     }
 
     private String format(long seconds) {
