@@ -6,6 +6,7 @@ import me.ogulcan.chatmod.service.WordFilter;
 import me.ogulcan.chatmod.service.DiscordNotifier;
 import me.ogulcan.chatmod.storage.PunishmentStore;
 import me.ogulcan.chatmod.storage.LogStore;
+import me.ogulcan.chatmod.hook.BetterTeamsHook;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -66,6 +67,7 @@ public class ChatListener implements Listener {
         }
         if (player.hasPermission("chatmoderation.bypass")) return;
         String message = event.getMessage();
+        if (BetterTeamsHook.isTeamChat(player, message)) return;
         if (useBlockedWords && WordFilter.containsBlockedWord(message, words)) {
             Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player, message));
             return;
