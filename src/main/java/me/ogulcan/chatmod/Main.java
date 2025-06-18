@@ -56,6 +56,9 @@ public class Main extends JavaPlugin {
         String effort = getConfig().getString("thinking-effort", "medium");
         long cacheMinutes = getConfig().getLong("moderation-cache-minutes", 5);
         boolean debug = getConfig().getBoolean("debug", false);
+        if (getConfig().getBoolean("use-zemberek", false)) {
+            me.ogulcan.chatmod.service.ZemberekStemmer.init();
+        }
         int connectTimeout = getConfig().getInt("http-connect-timeout", 10);
         int readTimeout = getConfig().getInt("http-read-timeout", 10);
         int maxRequests = getConfig().getInt("http-max-requests", 100);
