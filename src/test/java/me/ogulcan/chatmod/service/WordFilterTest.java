@@ -38,9 +38,17 @@ public class WordFilterTest {
     }
 
     @Test
+    public void testCanonicalDetection() {
+        List<String> words = List.of("sik");
+        assertTrue(WordFilter.containsBlockedWord("siiiik", words));
+        assertTrue(WordFilter.containsBlockedWord("s1k", words));
+        assertTrue(WordFilter.containsBlockedWord("\u015F\u00EFkk", words));
+    }
+
+    @Test
     public void testNormalizedWordList() {
         Set<String> words = List.of("orospu", "piç").stream()
-                .map(WordFilter::normalize)
+                .map(WordFilter::canonicalize)
                 .collect(java.util.stream.Collectors.toSet());
         assertTrue(WordFilter.containsBlockedWord("Sen bir orospu çocuğusun", words, true));
     }
@@ -48,7 +56,7 @@ public class WordFilterTest {
     @Test
     public void testNormalizedWordListClean() {
         Set<String> words = List.of("orospu", "piç").stream()
-                .map(WordFilter::normalize)
+                .map(WordFilter::canonicalize)
                 .collect(java.util.stream.Collectors.toSet());
         assertFalse(WordFilter.containsBlockedWord("Merhaba nasılsın", words, true));
     }
