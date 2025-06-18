@@ -38,14 +38,15 @@ public class ChatListener implements Listener {
     private final Map<String, Boolean> categoryEnabled;
     private final Map<String, Double> categoryRatio;
 
-    public ChatListener(Main plugin, ModerationService service, PunishmentStore store, LogStore logStore, DiscordNotifier notifier) {
+    public ChatListener(Main plugin, ModerationService service, PunishmentStore store, LogStore logStore,
+                        DiscordNotifier notifier, java.util.List<String> blockedWords) {
         this.plugin = plugin;
         this.service = service;
         this.store = store;
         this.logStore = logStore;
         this.notifier = notifier;
         this.categories = plugin.getConfig().getStringList("blocked-categories");
-        java.util.List<String> words = plugin.getConfig().getStringList("blocked-words");
+        java.util.List<String> words = blockedWords;
 
         org.bukkit.configuration.ConfigurationSection mapSec =
                 plugin.getConfig().getConfigurationSection("character-mapping");

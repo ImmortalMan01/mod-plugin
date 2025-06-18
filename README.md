@@ -64,7 +64,8 @@ Each category can also be tuned individually under the `category-settings`
 section. Set `enabled` to `false` to disable muting for a category or adjust the
 `ratio` value to change the score threshold used for that category. If a
 specific ratio is not provided, the global `threshold` option is used.
-You can also define `blocked-words` for custom profanity detection. Any chat message
+You can also define custom profanity lists in `blocked_words_en.yml` or
+`blocked_words_tr.yml` depending on the selected language. Any chat message
 containing one of these words will be muted without an API call. **`use-blocked-words`
 must be `true` for this filter to operate;** set it to `false` if you want to rely solely
 on the OpenAI model.
@@ -188,5 +189,5 @@ are persisted (default `100` ticks).
 Use `/cm reload` to re-read all configuration files. OpenAI options such as
 `openai-key`, `model`, `threshold` and `rate-limit` are applied immediately and
 event listeners are re-registered without restarting the server. Changes to the
-`blocked-words` list are also detected automatically when `config.yml` is saved
-so the filter updates without using this command.
+blocked words file are detected automatically so the filter updates without using
+this command.

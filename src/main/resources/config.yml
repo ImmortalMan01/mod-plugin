@@ -86,13 +86,6 @@ use-stemming: false
 # When language is 'tr', enable this to match lemmas using the Zemberek analyzer
 use-zemberek: false
 blocked-word-distance: 1
-blocked-words:
-  - amk
-  - orospu
-  - pic
-  - sik
-  - yarak
-  - got
 character-mapping:
   '0': 'o'
   '1': 'i'
