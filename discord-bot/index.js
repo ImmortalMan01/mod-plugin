@@ -470,8 +470,8 @@ app.post('/mute', async (req, res) => {
           { name: strings[lang].fieldMuteType, value: typeStr, inline: true },
           { name: strings[lang].fieldDate, value: date, inline: true },
           { name: strings[lang].fieldMutedBy, value: actor, inline: true },
-          { name: strings[lang].fieldMutedPlayer, value: player, inline: true },
-          { name: strings[lang].fieldDuration, value: duration, inline: true },
+          { name: strings[lang].fieldMutedPlayer, value: player },
+          { name: strings[lang].fieldDuration, value: duration },
           { name: strings[lang].fieldReason, value: reason || 'N/A' }
         );
       await channel.send({ embeds: [embed], components: [row] });
