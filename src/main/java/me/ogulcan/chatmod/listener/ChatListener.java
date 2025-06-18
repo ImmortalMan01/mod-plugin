@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 public class ChatListener implements Listener {
@@ -27,9 +28,8 @@ public class ChatListener implements Listener {
     private final LogStore logStore;
     private final DiscordNotifier notifier;
     private final List<String> categories;
-    private final List<String> words;
-    private final java.util.Set<String> normalizedWords;
-    private final java.util.List<Pattern> regexPatterns;
+    private final AtomicReference<java.util.Set<String>> normalizedWords = new AtomicReference<>();
+    private final AtomicReference<java.util.List<Pattern>> regexPatterns = new AtomicReference<>();
     private final boolean useBlockedWords;
     private final boolean useBlockedCategories;
     private final int blockedWordDistance;
@@ -43,7 +43,7 @@ public class ChatListener implements Listener {
         this.logStore = logStore;
         this.notifier = notifier;
         this.categories = plugin.getConfig().getStringList("blocked-categories");
-        this.words = plugin.getConfig().getStringList("blocked-words");
+        java.util.List<String> words = plugin.getConfig().getStringList("blocked-words");
 
         org.bukkit.configuration.ConfigurationSection mapSec =
                 plugin.getConfig().getConfigurationSection("character-mapping");
@@ -57,15 +57,7 @@ public class ChatListener implements Listener {
             }
         }
         WordFilter.setCharacterMap(charMap);
-        this.normalizedWords = new java.util.HashSet<>();
-        this.regexPatterns = new java.util.ArrayList<>();
-        for (String w : this.words) {
-            if (w.startsWith("/") && w.endsWith("/") && w.length() > 1) {
-                this.regexPatterns.add(Pattern.compile(w.substring(1, w.length() - 1)));
-            } else {
-                this.normalizedWords.add(WordFilter.canonicalize(w));
-            }
-        }
+        updateBlockedWords(words);
         this.useBlockedWords = plugin.getConfig().getBoolean("use-blocked-words", true);
         this.blockedWordDistance = plugin.getConfig().getInt("blocked-word-distance", 1);
         this.useBlockedCategories = plugin.getConfig().getBoolean("use-blocked-categories", true);
@@ -95,7 +87,7 @@ public class ChatListener implements Listener {
         if (player.hasPermission("chatmoderation.bypass")) return;
         String message = event.getMessage();
         if (BetterTeamsHook.isTeamChat(player, message)) return;
-        if (useBlockedWords && WordFilter.containsBlockedWord(message, normalizedWords, regexPatterns, true, blockedWordDistance)) {
+        if (useBlockedWords && WordFilter.containsBlockedWord(message, normalizedWords.get(), regexPatterns.get(), true, blockedWordDistance)) {
             Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player, message));
             return;
         }
@@ -167,5 +159,24 @@ public class ChatListener implements Listener {
             return min + " dakika " + sec + " saniye";
         }
         return min + "m " + sec + "s";
+    }
+
+    /**
+     * Rebuild the normalized word and regex pattern lists from the provided
+     * values. The references are swapped atomically so chat threads always see
+     * a consistent snapshot.
+     */
+    public void updateBlockedWords(List<String> words) {
+        java.util.Set<String> newSet = new java.util.HashSet<>();
+        java.util.List<Pattern> newPatterns = new java.util.ArrayList<>();
+        for (String w : words) {
+            if (w.startsWith("/") && w.endsWith("/") && w.length() > 1) {
+                newPatterns.add(Pattern.compile(w.substring(1, w.length() - 1)));
+            } else {
+                newSet.add(WordFilter.canonicalize(w));
+            }
+        }
+        normalizedWords.set(newSet);
+        regexPatterns.set(newPatterns);
     }
 }
