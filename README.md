@@ -74,6 +74,9 @@ tokens are combined, allowing `s i k` to match a blocked word of `sik` while
 digits are mapped to similar letters (for example `s1k` becomes `sik`,
 `s2k` becomes `szk`, `g6k` becomes `ggk`, and `s9k` may match `sgk` or `sqk`) and
 longer letter runs are collapsed so `siiiik` also triggers.
+You can also prefix and suffix an entry with `/` to use a regular expression.
+These regex patterns are matched against the normalized text. For example
+`/bad(word)?/` would block both `bad` and `badword`.
 
 ### GUI Customization
 A language-specific `gui_<lang>.yml` file controls the layout of the `/cm gui` dashboard. The `<lang>` part
