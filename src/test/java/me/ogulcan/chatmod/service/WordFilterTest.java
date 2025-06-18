@@ -117,6 +117,12 @@ public class WordFilterTest {
     }
 
     @Test
+    public void testFuzzyThresholdSingleCharIgnored() {
+        List<String> words = List.of("sik");
+        assertFalse(WordFilter.containsBlockedWord("s", words, 0, false, false, 60));
+    }
+
+    @Test
     public void testStemmingMatches() {
         WordFilter.setLanguage("en");
         Set<String> words = Set.of(WordFilter.canonicalize("run"));
