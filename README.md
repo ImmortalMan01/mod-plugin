@@ -4,7 +4,7 @@ A simple Paper/Spigot plugin that integrates with OpenAI Moderation API to autom
 
 ## Building
 Requires JDK 21. If the Gradle wrapper JAR is missing, run `gradle wrapper` or use your system Gradle.
-The project depends on the [Snowball stemmer](https://github.com/snowballstem/snowball). Gradle will download this library automatically.
+The project depends on the [Snowball stemmer](https://github.com/snowballstem/snowball) and the Zemberek NLP libraries. Gradle will download these libraries automatically.
 
 ```
 ./gradlew shadowJar
