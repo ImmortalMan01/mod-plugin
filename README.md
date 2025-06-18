@@ -64,8 +64,9 @@ section. Set `enabled` to `false` to disable muting for a category or adjust the
 `ratio` value to change the score threshold used for that category. If a
 specific ratio is not provided, the global `threshold` option is used.
 You can also define `blocked-words` for custom profanity detection. Any chat message
-containing one of these words will be muted without an API call. Set `use-blocked-words`
-to `false` to disable this list-based filter and rely solely on the OpenAI model.
+containing one of these words will be muted without an API call. **`use-blocked-words`
+must be `true` for this filter to operate;** set it to `false` if you want to rely solely
+on the OpenAI model.
 The filter normalizes text when matching, converting Turkish letters like
 `ş`, `ö`, `ç`, `ğ`, `ı` and `ü` to their ASCII equivalents and removing other
 diacritics. Punctuation is converted to spaces so word boundaries are kept.
