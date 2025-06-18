@@ -81,6 +81,8 @@ save-interval-ticks: 100
 use-blocked-categories: true
 # When true, messages are scanned against the blocked-words list before using the API
 use-blocked-words: true
+# Set to true to match stems so 'testing' also matches a blocked word of 'test'
+use-stemming: false
 blocked-word-distance: 1
 blocked-words:
   - amk

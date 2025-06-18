@@ -69,8 +69,9 @@ must be `true` for this filter to operate;** set it to `false` if you want to re
 on the OpenAI model.
 The filter normalizes text when matching, converting Turkish letters like
 `ş`, `ö`, `ç`, `ğ`, `ı` and `ü` to their ASCII equivalents and removing other
-diacritics. Confusable characters from other alphabets such as Cyrillic `а`,
-`ѕ` or `е` are also mapped to their ASCII forms. Punctuation is converted to
+diacritics. Zero-width characters are stripped so they cannot be used to split
+words. Confusable characters from other alphabets such as Cyrillic `а`, `ѕ`,
+`е` or `і` are also mapped to their ASCII forms. Punctuation is converted to
 spaces so word boundaries are kept.
 Each token is checked against the block list and consecutive single-letter
 tokens are combined, allowing `s i k` to match a blocked word of `sik`.
@@ -82,6 +83,9 @@ also triggers.
 Words within a small Levenshtein distance can also trigger the filter. The
 `blocked-word-distance` option (default `1`) controls how many edits are
 allowed when comparing each token to a blocked word.
+Enable `use-stemming` if you want the filter to also match simple word stems.
+For example a blocked word of `run` will also match `running` or `runner` when
+stemming is active.
 You can also prefix and suffix an entry with `/` to use a regular expression.
 These regex patterns are matched against the normalized text. For example
 
