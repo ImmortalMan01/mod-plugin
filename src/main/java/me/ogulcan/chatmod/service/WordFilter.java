@@ -25,9 +25,15 @@ public class WordFilter {
             Map.entry('і', 'i')  // Cyrillic i
     );
 
-    private static final java.util.Map<Character, Character> DIGIT_MAP =
+    private static java.util.Map<Character, Character> CHAR_MAP =
             java.util.Map.of('0', 'o', '1', 'i', '2', 'z', '3', 'e', '4', 'a',
                               '5', 's', '6', 'g', '7', 't', '8', 'b', '9', 'g');
+
+    public static void setCharacterMap(java.util.Map<Character, Character> map) {
+        if (map != null && !map.isEmpty()) {
+            CHAR_MAP = java.util.Map.copyOf(map);
+        }
+    }
 
     /**
      * Normalize text by converting to lowercase, replacing common Turkish
@@ -66,11 +72,7 @@ public class WordFilter {
 
         StringBuilder mapped = new StringBuilder();
         for (char c : normalized.toCharArray()) {
-            if (Character.isDigit(c) && DIGIT_MAP.containsKey(c)) {
-                mapped.append(DIGIT_MAP.get(c));
-            } else {
-                mapped.append(c);
-            }
+            mapped.append(CHAR_MAP.getOrDefault(c, c));
         }
 
         StringBuilder collapsed = new StringBuilder();

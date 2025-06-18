@@ -73,15 +73,33 @@ diacritics. Confusable characters from other alphabets such as Cyrillic `а`,
 `ѕ` or `е` are also mapped to their ASCII forms. Punctuation is converted to
 spaces so word boundaries are kept.
 Each token is checked against the block list and consecutive single-letter
-tokens are combined, allowing `s i k` to match a blocked word of `sik` while
-digits are mapped to similar letters (for example `s1k` becomes `sik`,
-`s2k` becomes `szk`, `g6k` becomes `ggk`, and `s9k` may match `sgk` or `sqk`) and
-longer letter runs are collapsed so `siiiik` also triggers.
+tokens are combined, allowing `s i k` to match a blocked word of `sik`.
+Characters can be remapped through the `character-mapping` section of
+`config.yml`. By default digits are mapped to similar letters (for example
+`s1k` becomes `sik`, `s2k` becomes `szk`, `g6k` becomes `ggk`, and `s9k`
+may match `sgk` or `sqk`) and longer letter runs are collapsed so `siiiik`
+also triggers.
 Words within a small Levenshtein distance can also trigger the filter. The
 `blocked-word-distance` option (default `1`) controls how many edits are
 allowed when comparing each token to a blocked word.
 You can also prefix and suffix an entry with `/` to use a regular expression.
 These regex patterns are matched against the normalized text. For example
+
+Example character mapping:
+```yml
+character-mapping:
+  '0': 'o'
+  '1': 'i'
+  '2': 'z'
+  '3': 'e'
+  '4': 'a'
+  '5': 's'
+  '6': 'g'
+  '7': 't'
+  '8': 'b'
+  '9': 'g'
+```
+
 `/bad(word)?/` would block both `bad` and `badword`.
 
 ### GUI Customization
