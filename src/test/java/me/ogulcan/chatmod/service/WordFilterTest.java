@@ -110,4 +110,11 @@ public class WordFilterTest {
         assertTrue(WordFilter.containsBlockedWord("slk", words, 1));
     }
 
+    @Test
+    public void testStemmingMatches() {
+        WordFilter.setLanguage("en");
+        Set<String> words = Set.of(WordFilter.canonicalize("run"));
+        assertTrue(WordFilter.containsBlockedWord("running", words, java.util.Collections.emptyList(), true, 0, true));
+    }
+
 }

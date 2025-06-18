@@ -7,6 +7,8 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
+import org.tartarus.snowball.ext.englishStemmer;
+import org.tartarus.snowball.ext.turkishStemmer;
 
 public class WordFilter {
 
@@ -31,10 +33,34 @@ public class WordFilter {
             java.util.Map.of('0', 'o', '1', 'i', '2', 'z', '3', 'e', '4', 'a',
                               '5', 's', '6', 'g', '7', 't', '8', 'b', '9', 'g');
 
+    private static final englishStemmer ENGLISH = new englishStemmer();
+    private static final turkishStemmer TURKISH = new turkishStemmer();
+    private static String LANGUAGE = "en";
+
     public static void setCharacterMap(java.util.Map<Character, Character> map) {
         if (map != null && !map.isEmpty()) {
             CHAR_MAP = java.util.Map.copyOf(map);
         }
+    }
+
+    /** Set the stemming language, either "en" or "tr". */
+    public static void setLanguage(String lang) {
+        LANGUAGE = "tr".equalsIgnoreCase(lang) ? "tr" : "en";
+    }
+
+    /**
+     * Stem a single word using the configured language.
+     */
+    public static String stem(String word) {
+        if (word == null || word.isEmpty()) return "";
+        if ("tr".equals(LANGUAGE)) {
+            TURKISH.setCurrent(word);
+            TURKISH.stem();
+            return TURKISH.getCurrent();
+        }
+        ENGLISH.setCurrent(word);
+        ENGLISH.stem();
+        return ENGLISH.getCurrent();
     }
 
     /**
@@ -117,10 +143,14 @@ public class WordFilter {
     }
 
     public static boolean containsBlockedWord(String message, List<String> blockedWords) {
-        return containsBlockedWord(message, blockedWords, 0);
+        return containsBlockedWord(message, blockedWords, 0, false);
     }
 
     public static boolean containsBlockedWord(String message, List<String> blockedWords, int maxDistance) {
+        return containsBlockedWord(message, blockedWords, maxDistance, false);
+    }
+
+    public static boolean containsBlockedWord(String message, List<String> blockedWords, int maxDistance, boolean useStemming) {
         if (message == null) return false;
         Set<String> normalized = new HashSet<>();
         List<Pattern> patterns = new java.util.ArrayList<>();
@@ -131,7 +161,7 @@ public class WordFilter {
                 normalized.add(canonicalize(w));
             }
         }
-        return containsBlockedWord(message, normalized, patterns, true, maxDistance);
+        return containsBlockedWord(message, normalized, patterns, true, maxDistance, useStemming);
     }
 
     /**
@@ -139,18 +169,22 @@ public class WordFilter {
      * is already normalized. This avoids normalizing each word repeatedly.
      */
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, boolean wordsNormalized) {
-        return containsBlockedWord(message, normalizedWords, java.util.Collections.emptyList(), wordsNormalized, 0);
+        return containsBlockedWord(message, normalizedWords, java.util.Collections.emptyList(), wordsNormalized, 0, false);
     }
 
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, boolean wordsNormalized, int maxDistance) {
-        return containsBlockedWord(message, normalizedWords, java.util.Collections.emptyList(), wordsNormalized, maxDistance);
+        return containsBlockedWord(message, normalizedWords, java.util.Collections.emptyList(), wordsNormalized, maxDistance, false);
     }
 
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized) {
-        return containsBlockedWord(message, normalizedWords, regexPatterns, wordsNormalized, 0);
+        return containsBlockedWord(message, normalizedWords, regexPatterns, wordsNormalized, 0, false);
     }
 
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized, int maxDistance) {
+        return containsBlockedWord(message, normalizedWords, regexPatterns, wordsNormalized, maxDistance, false);
+    }
+
+    public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized, int maxDistance, boolean useStemming) {
         if (!wordsNormalized) {
             // Normalize words and patterns
             Set<String> normalized = new HashSet<>();
@@ -162,7 +196,7 @@ public class WordFilter {
                     normalized.add(canonicalize(w));
                 }
             }
-            return containsBlockedWord(message, normalized, patterns, true, maxDistance);
+            return containsBlockedWord(message, normalized, patterns, true, maxDistance, useStemming);
         }
         if (message == null) return false;
         String normalizedMessage = canonicalize(message);
@@ -189,9 +223,23 @@ public class WordFilter {
         }
         if (sb.length() > 0) words.add(sb.toString());
 
+        Set<String> stemmedWords = null;
+        if (useStemming) {
+            stemmedWords = new HashSet<>();
+            for (String w : normalizedWords) {
+                stemmedWords.add(stem(w));
+            }
+        }
+
         for (String token : words) {
             if (normalizedWords.stream().anyMatch(token::contains)) {
                 return true;
+            }
+            if (useStemming) {
+                String ts = stem(token);
+                if (stemmedWords.contains(ts)) {
+                    return true;
+                }
             }
         }
         if (maxDistance > 0) {
@@ -199,6 +247,13 @@ public class WordFilter {
                 for (String w : normalizedWords) {
                     if (Math.abs(token.length() - w.length()) > maxDistance) continue;
                     if (levenshtein(token, w) <= maxDistance) return true;
+                }
+                if (useStemming) {
+                    String ts = stem(token);
+                    for (String sw : stemmedWords) {
+                        if (Math.abs(ts.length() - sw.length()) > maxDistance) continue;
+                        if (levenshtein(ts, sw) <= maxDistance) return true;
+                    }
                 }
             }
         }

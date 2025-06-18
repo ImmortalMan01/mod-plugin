@@ -33,6 +33,7 @@ public class ChatListener implements Listener {
     private final boolean useBlockedWords;
     private final boolean useBlockedCategories;
     private final int blockedWordDistance;
+    private final boolean useStemming;
     private final Map<String, Boolean> categoryEnabled;
     private final Map<String, Double> categoryRatio;
 
@@ -57,8 +58,10 @@ public class ChatListener implements Listener {
             }
         }
         WordFilter.setCharacterMap(charMap);
+        WordFilter.setLanguage(plugin.getConfig().getString("language", "en"));
         updateBlockedWords(words);
         this.useBlockedWords = plugin.getConfig().getBoolean("use-blocked-words", true);
+        this.useStemming = plugin.getConfig().getBoolean("use-stemming", false);
         this.blockedWordDistance = plugin.getConfig().getInt("blocked-word-distance", 1);
         this.useBlockedCategories = plugin.getConfig().getBoolean("use-blocked-categories", true);
         this.categoryEnabled = new HashMap<>();
@@ -87,7 +90,7 @@ public class ChatListener implements Listener {
         if (player.hasPermission("chatmoderation.bypass")) return;
         String message = event.getMessage();
         if (BetterTeamsHook.isTeamChat(player, message)) return;
-        if (useBlockedWords && WordFilter.containsBlockedWord(message, normalizedWords.get(), regexPatterns.get(), true, blockedWordDistance)) {
+        if (useBlockedWords && WordFilter.containsBlockedWord(message, normalizedWords.get(), regexPatterns.get(), true, blockedWordDistance, useStemming)) {
             Bukkit.getScheduler().runTask(plugin, () -> applyPunishment(player, message));
             return;
         }
