@@ -14,6 +14,10 @@ public class WordFilter {
     private static final Pattern PUNCT = Pattern.compile("[^\\p{L}\\p{Nd}\\s]");
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
 
+    private static final java.util.Map<Character, Character> DIGIT_MAP =
+            java.util.Map.of('0', 'o', '1', 'i', '3', 'e', '4', 'a', '5', 's',
+                              '7', 't', '8', 'b');
+
     /**
      * Normalize text by converting to lowercase, replacing common Turkish
      * characters with their ASCII equivalents, stripping any remaining
@@ -21,6 +25,14 @@ public class WordFilter {
      * collapsed to a single space and the result is trimmed.
      */
     public static String normalize(String text) {
+        return normalize(text, false);
+    }
+
+    /**
+     * @param canonical if true digits are mapped to letters and repeated
+     *                  characters are collapsed
+     */
+    public static String normalize(String text, boolean canonical) {
         if (text == null) return "";
         String lower = text.toLowerCase(Locale.ROOT)
                 .replace('ğ', 'g')
@@ -32,14 +44,39 @@ public class WordFilter {
         String nfd = Normalizer.normalize(lower, Normalizer.Form.NFD);
         String withoutDiacritics = DIACRITICS.matcher(nfd).replaceAll("");
         String withSpaces = PUNCT.matcher(withoutDiacritics).replaceAll(" ");
-        return WHITESPACE.matcher(withSpaces).replaceAll(" ").trim();
+        String base = WHITESPACE.matcher(withSpaces).replaceAll(" ").trim();
+        if (!canonical) return base;
+
+        StringBuilder mapped = new StringBuilder();
+        for (char c : base.toCharArray()) {
+            if (Character.isDigit(c) && DIGIT_MAP.containsKey(c)) {
+                mapped.append(DIGIT_MAP.get(c));
+            } else {
+                mapped.append(c);
+            }
+        }
+
+        StringBuilder collapsed = new StringBuilder();
+        char prev = 0;
+        for (int i = 0; i < mapped.length(); i++) {
+            char c = mapped.charAt(i);
+            if (c != prev || c == ' ') {
+                collapsed.append(c);
+                prev = c;
+            }
+        }
+        return collapsed.toString();
+    }
+
+    public static String canonicalize(String text) {
+        return normalize(text, true);
     }
 
     public static boolean containsBlockedWord(String message, List<String> blockedWords) {
         if (message == null) return false;
         Set<String> normalized = new HashSet<>();
         for (String w : blockedWords) {
-            normalized.add(normalize(w));
+            normalized.add(canonicalize(w));
         }
         return containsBlockedWord(message, normalized, true);
     }
@@ -54,7 +91,7 @@ public class WordFilter {
             return containsBlockedWord(message, new java.util.ArrayList<>(normalizedWords));
         }
         if (message == null) return false;
-        String normalizedMessage = normalize(message);
+        String normalizedMessage = canonicalize(message);
         String[] tokens = normalizedMessage.split(" ");
 
         // Merge consecutive single-character tokens so "s i k" becomes "sik"

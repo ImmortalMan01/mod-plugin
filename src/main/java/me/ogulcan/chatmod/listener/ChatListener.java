@@ -42,7 +42,7 @@ public class ChatListener implements Listener {
         this.categories = plugin.getConfig().getStringList("blocked-categories");
         this.words = plugin.getConfig().getStringList("blocked-words");
         this.normalizedWords = this.words.stream()
-                .map(WordFilter::normalize)
+                .map(WordFilter::canonicalize)
                 .collect(java.util.stream.Collectors.toSet());
         this.useBlockedWords = plugin.getConfig().getBoolean("use-blocked-words", true);
         this.useBlockedCategories = plugin.getConfig().getBoolean("use-blocked-categories", true);
