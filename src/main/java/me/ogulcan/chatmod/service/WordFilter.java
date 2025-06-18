@@ -288,7 +288,9 @@ public class WordFilter {
         }
         if (fuzzyThreshold > 0) {
             for (String token : words) {
+                if (token.length() <= 1) continue;
                 for (String w : normalizedWords) {
+                    if (w.length() <= 1) continue;
                     if (FuzzySearch.partialRatio(token, w) >= fuzzyThreshold) return true;
                 }
             }
