@@ -69,7 +69,9 @@ must be `true` for this filter to operate;** set it to `false` if you want to re
 on the OpenAI model.
 The filter normalizes text when matching, converting Turkish letters like
 `ş`, `ö`, `ç`, `ğ`, `ı` and `ü` to their ASCII equivalents and removing other
-diacritics. Punctuation is converted to spaces so word boundaries are kept.
+diacritics. Confusable characters from other alphabets such as Cyrillic `а`,
+`ѕ` or `е` are also mapped to their ASCII forms. Punctuation is converted to
+spaces so word boundaries are kept.
 Each token is checked against the block list and consecutive single-letter
 tokens are combined, allowing `s i k` to match a blocked word of `sik` while
 digits are mapped to similar letters (for example `s1k` becomes `sik`,

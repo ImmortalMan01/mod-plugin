@@ -58,6 +58,12 @@ public class WordFilterTest {
     }
 
     @Test
+    public void testConfusableCharacters() {
+        List<String> words = List.of("sik");
+        assertTrue(WordFilter.containsBlockedWord("\u0455ik", words));
+    }
+
+    @Test
     public void testNormalizedWordList() {
         Set<String> words = List.of("orospu", "piç").stream()
                 .map(WordFilter::canonicalize)

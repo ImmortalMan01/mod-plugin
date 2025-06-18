@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 public class WordFilter {
@@ -13,6 +14,16 @@ public class WordFilter {
     // Replace punctuation with spaces but keep letters, digits and whitespace
     private static final Pattern PUNCT = Pattern.compile("[^\\p{L}\\p{Nd}\\s]");
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
+
+    // Map common confusable characters (e.g. Cyrillic letters) to ASCII
+    private static final Map<Character, Character> CONFUSABLE_MAP = Map.ofEntries(
+            Map.entry('а', 'a'), // Cyrillic a
+            Map.entry('е', 'e'), // Cyrillic e
+            Map.entry('ѕ', 's'), // Cyrillic dze
+            Map.entry('о', 'o'), // Cyrillic o
+            Map.entry('р', 'p'), // Cyrillic er
+            Map.entry('і', 'i')  // Cyrillic i
+    );
 
     private static final java.util.Map<Character, Character> DIGIT_MAP =
             java.util.Map.of('0', 'o', '1', 'i', '2', 'z', '3', 'e', '4', 'a',
@@ -45,10 +56,16 @@ public class WordFilter {
         String withoutDiacritics = DIACRITICS.matcher(nfd).replaceAll("");
         String withSpaces = PUNCT.matcher(withoutDiacritics).replaceAll(" ");
         String base = WHITESPACE.matcher(withSpaces).replaceAll(" ").trim();
-        if (!canonical) return base;
+
+        StringBuilder replaced = new StringBuilder(base.length());
+        for (char c : base.toCharArray()) {
+            replaced.append(CONFUSABLE_MAP.getOrDefault(c, c));
+        }
+        String normalized = replaced.toString();
+        if (!canonical) return normalized;
 
         StringBuilder mapped = new StringBuilder();
-        for (char c : base.toCharArray()) {
+        for (char c : normalized.toCharArray()) {
             if (Character.isDigit(c) && DIGIT_MAP.containsKey(c)) {
                 mapped.append(DIGIT_MAP.get(c));
             } else {
