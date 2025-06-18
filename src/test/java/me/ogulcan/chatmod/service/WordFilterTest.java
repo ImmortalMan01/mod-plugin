@@ -117,4 +117,11 @@ public class WordFilterTest {
         assertTrue(WordFilter.containsBlockedWord("running", words, java.util.Collections.emptyList(), true, 0, true));
     }
 
+    @Test
+    public void testZemberekLemmas() {
+        WordFilter.setLanguage("tr");
+        Set<String> words = Set.of(WordFilter.canonicalize("sik"));
+        assertTrue(WordFilter.containsBlockedWord("sikleri", words, java.util.Collections.emptyList(), true, 0, false, true));
+    }
+
 }

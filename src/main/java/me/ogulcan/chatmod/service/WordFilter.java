@@ -143,14 +143,18 @@ public class WordFilter {
     }
 
     public static boolean containsBlockedWord(String message, List<String> blockedWords) {
-        return containsBlockedWord(message, blockedWords, 0, false);
+        return containsBlockedWord(message, blockedWords, 0, false, false);
     }
 
     public static boolean containsBlockedWord(String message, List<String> blockedWords, int maxDistance) {
-        return containsBlockedWord(message, blockedWords, maxDistance, false);
+        return containsBlockedWord(message, blockedWords, maxDistance, false, false);
     }
 
     public static boolean containsBlockedWord(String message, List<String> blockedWords, int maxDistance, boolean useStemming) {
+        return containsBlockedWord(message, blockedWords, maxDistance, useStemming, useStemming && "tr".equals(LANGUAGE));
+    }
+
+    public static boolean containsBlockedWord(String message, List<String> blockedWords, int maxDistance, boolean useStemming, boolean useZemberek) {
         if (message == null) return false;
         Set<String> normalized = new HashSet<>();
         List<Pattern> patterns = new java.util.ArrayList<>();
@@ -161,7 +165,7 @@ public class WordFilter {
                 normalized.add(canonicalize(w));
             }
         }
-        return containsBlockedWord(message, normalized, patterns, true, maxDistance, useStemming);
+        return containsBlockedWord(message, normalized, patterns, true, maxDistance, useStemming, useZemberek);
     }
 
     /**
@@ -181,10 +185,14 @@ public class WordFilter {
     }
 
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized, int maxDistance) {
-        return containsBlockedWord(message, normalizedWords, regexPatterns, wordsNormalized, maxDistance, false);
+        return containsBlockedWord(message, normalizedWords, regexPatterns, wordsNormalized, maxDistance, false, false);
     }
 
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized, int maxDistance, boolean useStemming) {
+        return containsBlockedWord(message, normalizedWords, regexPatterns, wordsNormalized, maxDistance, useStemming, useStemming && "tr".equals(LANGUAGE));
+    }
+
+    public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized, int maxDistance, boolean useStemming, boolean useZemberek) {
         if (!wordsNormalized) {
             // Normalize words and patterns
             Set<String> normalized = new HashSet<>();
@@ -196,7 +204,7 @@ public class WordFilter {
                     normalized.add(canonicalize(w));
                 }
             }
-            return containsBlockedWord(message, normalized, patterns, true, maxDistance, useStemming);
+            return containsBlockedWord(message, normalized, patterns, true, maxDistance, useStemming, useZemberek);
         }
         if (message == null) return false;
         String normalizedMessage = canonicalize(message);
@@ -230,10 +238,23 @@ public class WordFilter {
                 stemmedWords.add(stem(w));
             }
         }
+        Set<String> lemmaWords = null;
+        if (useZemberek && "tr".equals(LANGUAGE)) {
+            lemmaWords = new HashSet<>();
+            for (String w : normalizedWords) {
+                lemmaWords.add(ZemberekStemmer.lemma(w));
+            }
+        }
 
         for (String token : words) {
             if (normalizedWords.stream().anyMatch(token::contains)) {
                 return true;
+            }
+            if (useZemberek && lemmaWords != null) {
+                String lt = ZemberekStemmer.lemma(token);
+                if (lemmaWords.contains(lt)) {
+                    return true;
+                }
             }
             if (useStemming) {
                 String ts = stem(token);
@@ -247,6 +268,13 @@ public class WordFilter {
                 for (String w : normalizedWords) {
                     if (Math.abs(token.length() - w.length()) > maxDistance) continue;
                     if (levenshtein(token, w) <= maxDistance) return true;
+                }
+                if (useZemberek && lemmaWords != null) {
+                    String lt = ZemberekStemmer.lemma(token);
+                    for (String lw : lemmaWords) {
+                        if (Math.abs(lt.length() - lw.length()) > maxDistance) continue;
+                        if (levenshtein(lt, lw) <= maxDistance) return true;
+                    }
                 }
                 if (useStemming) {
                     String ts = stem(token);
