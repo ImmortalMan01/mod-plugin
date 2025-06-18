@@ -75,10 +75,15 @@ public class WordFilter {
     public static boolean containsBlockedWord(String message, List<String> blockedWords) {
         if (message == null) return false;
         Set<String> normalized = new HashSet<>();
+        List<Pattern> patterns = new java.util.ArrayList<>();
         for (String w : blockedWords) {
-            normalized.add(canonicalize(w));
+            if (w.startsWith("/") && w.endsWith("/") && w.length() > 1) {
+                patterns.add(Pattern.compile(w.substring(1, w.length() - 1)));
+            } else {
+                normalized.add(canonicalize(w));
+            }
         }
-        return containsBlockedWord(message, normalized, true);
+        return containsBlockedWord(message, normalized, patterns, true);
     }
 
     /**
@@ -86,12 +91,30 @@ public class WordFilter {
      * is already normalized. This avoids normalizing each word repeatedly.
      */
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, boolean wordsNormalized) {
+        return containsBlockedWord(message, normalizedWords, java.util.Collections.emptyList(), wordsNormalized);
+    }
+
+    public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized) {
         if (!wordsNormalized) {
-            // Convert and delegate
-            return containsBlockedWord(message, new java.util.ArrayList<>(normalizedWords));
+            // Normalize words and patterns
+            Set<String> normalized = new HashSet<>();
+            List<Pattern> patterns = new java.util.ArrayList<>(regexPatterns);
+            for (String w : normalizedWords) {
+                if (w.startsWith("/") && w.endsWith("/") && w.length() > 1) {
+                    patterns.add(Pattern.compile(w.substring(1, w.length() - 1)));
+                } else {
+                    normalized.add(canonicalize(w));
+                }
+            }
+            return containsBlockedWord(message, normalized, patterns, true);
         }
         if (message == null) return false;
         String normalizedMessage = canonicalize(message);
+        for (Pattern p : regexPatterns) {
+            if (p.matcher(normalizedMessage).find()) {
+                return true;
+            }
+        }
         String[] tokens = normalizedMessage.split(" ");
 
         // Merge consecutive single-character tokens so "s i k" becomes "sik"

@@ -73,4 +73,17 @@ public class WordFilterTest {
         assertFalse(WordFilter.containsBlockedWord("Merhaba nasılsın", words, true));
     }
 
+    @Test
+    public void testRegexMatch() {
+        List<String> words = List.of("/bad(word)?/");
+        assertTrue(WordFilter.containsBlockedWord("such a badword indeed", words));
+    }
+
+    @Test
+    public void testRegexPrecompiledList() {
+        Set<String> words = Set.of("foo");
+        List<java.util.regex.Pattern> patterns = List.of(java.util.regex.Pattern.compile("bad(word)?"));
+        assertTrue(WordFilter.containsBlockedWord("another badword", words, patterns, true));
+    }
+
 }
