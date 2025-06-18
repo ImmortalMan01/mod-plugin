@@ -248,7 +248,9 @@ public class WordFilter {
         }
 
         for (String token : words) {
-            if (normalizedWords.stream().anyMatch(token::contains)) {
+            if (normalizedWords.stream().anyMatch(w ->
+                    token.equals(w) ||
+                    (token.contains(w) && token.length() - w.length() <= 4))) {
                 return true;
             }
             if (useZemberek && lemmaWords != null) {
