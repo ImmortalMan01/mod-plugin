@@ -44,6 +44,19 @@ public class ChatListener implements Listener {
         this.notifier = notifier;
         this.categories = plugin.getConfig().getStringList("blocked-categories");
         this.words = plugin.getConfig().getStringList("blocked-words");
+
+        org.bukkit.configuration.ConfigurationSection mapSec =
+                plugin.getConfig().getConfigurationSection("character-mapping");
+        java.util.Map<Character, Character> charMap = new java.util.HashMap<>();
+        if (mapSec != null) {
+            for (String k : mapSec.getKeys(false)) {
+                String v = mapSec.getString(k);
+                if (k.length() == 1 && v != null && v.length() == 1) {
+                    charMap.put(k.charAt(0), v.charAt(0));
+                }
+            }
+        }
+        WordFilter.setCharacterMap(charMap);
         this.normalizedWords = new java.util.HashSet<>();
         this.regexPatterns = new java.util.ArrayList<>();
         for (String w : this.words) {
