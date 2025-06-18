@@ -111,17 +111,23 @@ public class WordFilterTest {
     }
 
     @Test
+    public void testFuzzyThreshold() {
+        List<String> words = List.of("sik");
+        assertTrue(WordFilter.containsBlockedWord("skik", words, 0, false, false, 60));
+    }
+
+    @Test
     public void testStemmingMatches() {
         WordFilter.setLanguage("en");
         Set<String> words = Set.of(WordFilter.canonicalize("run"));
-        assertTrue(WordFilter.containsBlockedWord("running", words, java.util.Collections.emptyList(), true, 0, true));
+        assertTrue(WordFilter.containsBlockedWord("running", words, java.util.Collections.<java.util.regex.Pattern>emptyList(), true, 0, true, false, 0));
     }
 
     @Test
     public void testZemberekLemmas() {
         WordFilter.setLanguage("tr");
         Set<String> words = Set.of(WordFilter.canonicalize("sik"));
-        assertTrue(WordFilter.containsBlockedWord("sikleri", words, java.util.Collections.emptyList(), true, 0, false, true));
+        assertTrue(WordFilter.containsBlockedWord("sikleri", words, java.util.Collections.<java.util.regex.Pattern>emptyList(), true, 0, false, true, 0));
     }
 
 }
