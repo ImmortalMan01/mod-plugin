@@ -178,4 +178,6 @@ are persisted (default `100` ticks).
 
 Use `/cm reload` to re-read all configuration files. OpenAI options such as
 `openai-key`, `model`, `threshold` and `rate-limit` are applied immediately and
-event listeners are re-registered without restarting the server.
+event listeners are re-registered without restarting the server. Changes to the
+`blocked-words` list are also detected automatically when `config.yml` is saved
+so the filter updates without using this command.

@@ -15,6 +15,8 @@ import org.bukkit.event.HandlerList;
 import java.util.Map;
 import java.util.HashMap;
 import java.util.UUID;
+import java.util.List;
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -34,6 +36,8 @@ public class Main extends JavaPlugin {
     private FileConfiguration guiConfig;
     private boolean autoMute = true;
     private final Map<UUID, BukkitTask> tasks = new HashMap<>();
+    private ChatListener chatListener;
+    private long configLastModified;
 
     @Override
     public void onEnable() {
@@ -72,6 +76,8 @@ public class Main extends JavaPlugin {
         this.notifier = new DiscordNotifier(discordUrl, httpClient);
         this.store = new PunishmentStore(this, new File(getDataFolder(), "data/punishments.json"));
         this.logStore = new LogStore(this, new File(getDataFolder(), "data/logs.json"));
+        File configFile = new File(getDataFolder(), "config.yml");
+        this.configLastModified = configFile.lastModified();
         if (webPort > 0) {
             try {
                 this.webServer = new UnmuteServer(this, webPort, unmuteThreads);
@@ -80,11 +86,13 @@ public class Main extends JavaPlugin {
                 getLogger().warning("Failed to start web server: " + e.getMessage());
             }
         }
-        getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store, logStore, notifier), this);
+        this.chatListener = new ChatListener(this, moderationService, store, logStore, notifier);
+        getServer().getPluginManager().registerEvents(chatListener, this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
         getServer().getPluginManager().registerEvents(new PrivateMessageListener(this, store), this);
 
         getCommand("cm").setExecutor(new CmCommand(this, store));
+        startConfigWatcher(configFile);
     }
 
     public PunishmentStore getStore() {
@@ -181,9 +189,11 @@ public class Main extends JavaPlugin {
         }
 
         HandlerList.unregisterAll(this);
-        getServer().getPluginManager().registerEvents(new ChatListener(this, moderationService, store, logStore, notifier), this);
+        this.chatListener = new ChatListener(this, moderationService, store, logStore, notifier);
+        getServer().getPluginManager().registerEvents(chatListener, this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
         getServer().getPluginManager().registerEvents(new PrivateMessageListener(this, store), this);
+        this.configLastModified = new File(getDataFolder(), "config.yml").lastModified();
     }
 
     @Override
@@ -219,5 +229,21 @@ public class Main extends JavaPlugin {
     public void cancelUnmute(UUID uuid) {
         BukkitTask task = tasks.remove(uuid);
         if (task != null) task.cancel();
+    }
+
+    private void startConfigWatcher(File configFile) {
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            long mod = configFile.lastModified();
+            if (mod > configLastModified) {
+                configLastModified = mod;
+                List<String> words = YamlConfiguration.loadConfiguration(configFile)
+                        .getStringList("blocked-words");
+                Bukkit.getScheduler().runTask(this, () -> {
+                    reloadConfig();
+                    chatListener.updateBlockedWords(words);
+                    getLogger().info("Blocked words reloaded from config.yml");
+                });
+            }
+        }, 100L, 100L);
     }
 }
