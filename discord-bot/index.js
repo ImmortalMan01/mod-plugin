@@ -67,12 +67,18 @@ const strings = {
     statusUnmuted: '{0} is not muted',
     langChanged: 'Language set to {0}.',
     langUsage: 'Use /cm lang <en|tr> to change language.',
-    apiMute: 'Mute Type: {0}\nDate: {1}\nMuted By: {2}\nMuted Player: {3}\nDuration: {4}m\nReason: {5}',
     logFormat: '[{0}] {1} - **{3}** ({4}m) by {2}: {5}',
     type_game: 'In-Game Manual',
     type_discord: 'Discord Manual',
     type_auto: 'Automatic',
-    buttonUnmute: 'Unmute'
+    buttonUnmute: 'Unmute',
+    muteEmbedTitle: 'Mute Notice',
+    fieldMuteType: 'Type',
+    fieldDate: 'Date',
+    fieldMutedBy: 'Muted By',
+    fieldMutedPlayer: 'Player',
+    fieldDuration: 'Duration',
+    fieldReason: 'Reason'
   },
   tr: {
     menuLines: [
@@ -111,12 +117,18 @@ const strings = {
     statusUnmuted: '{0} susturulmamış',
     langChanged: 'Dil {0} olarak ayarlandı.',
     langUsage: '/cm lang <en|tr> komutunu kullanın.',
-    apiMute: 'Mute Biçimi: {0}\nTarih: {1}\nMute Atan Yetkili: {2}\nMute Atılan Oyuncu: {3}\nSüre: {4}dk\nSebep: {5}',
     logFormat: '[{0}] {1} - **{3}** ({4}dk) Yetkili: {2} | Sebep: {5}',
     type_game: 'Oyun İçi Manuel',
     type_discord: 'Discord Manuel',
     type_auto: 'Otomatik',
-    buttonUnmute: 'Kaldır'
+    buttonUnmute: 'Kaldır',
+    muteEmbedTitle: 'Susturma Bildirimi',
+    fieldMuteType: 'Biçim',
+    fieldDate: 'Tarih',
+    fieldMutedBy: 'Yetkili',
+    fieldMutedPlayer: 'Oyuncu',
+    fieldDuration: 'Süre',
+    fieldReason: 'Sebep'
   }
 };
 
@@ -448,13 +460,20 @@ app.post('/mute', async (req, res) => {
       );
       const date = new Date(timestamp || Date.now()).toLocaleString();
       const typeStr = strings[lang][`type_${type}`] || type;
-      const description = t('apiMute', typeStr, date, actor, player, remaining, reason);
+      const duration = `${remaining}${lang === 'tr' ? 'dk' : 'm'}`;
       const embed = new EmbedBuilder()
         .setColor(0xff5555)
-        .setTitle('Mute Notice')
-        .setDescription(description)
+        .setTitle(strings[lang].muteEmbedTitle)
         .setThumbnail(`https://mc-heads.net/avatar/${player}`)
-        .setImage(`https://mc-heads.net/body/${player}`);
+        .setImage(`https://mc-heads.net/body/${player}`)
+        .addFields(
+          { name: strings[lang].fieldMuteType, value: typeStr, inline: true },
+          { name: strings[lang].fieldDate, value: date, inline: true },
+          { name: strings[lang].fieldMutedBy, value: actor, inline: true },
+          { name: strings[lang].fieldMutedPlayer, value: player, inline: true },
+          { name: strings[lang].fieldDuration, value: duration, inline: true },
+          { name: strings[lang].fieldReason, value: reason || 'N/A' }
+        );
       await channel.send({ embeds: [embed], components: [row] });
     }
     res.json({ ok: true });

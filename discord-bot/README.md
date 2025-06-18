@@ -37,7 +37,7 @@ and provides a `/logs` slash command (plus an optional prefix command) to displa
 }
 ```
 
-The bot announces the mute in the configured channel using a styled embed. The embed shows the muted player's Minecraft skin and includes an **Unmute** button that triggers a request back to the plugin.
+The bot announces the mute in the configured channel using a styled embed. The embed shows the muted player's Minecraft skin, lists the mute details in separate fields, and includes an **Unmute** button that triggers a request back to the plugin.
 
 ## Commands
 
