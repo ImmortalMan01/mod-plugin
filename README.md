@@ -88,6 +88,9 @@ Enable `use-stemming` if you want the filter to also match simple word stems.
 For example a blocked word of `run` will also match `running` or `runner` when
 stemming is active. The stemmer supports English and Turkish based on the
 `language` setting.
+When the `language` is set to `tr`, enabling `use-zemberek` will use the
+Zemberek morphological analyzer so inflected forms like `sikleri` are detected
+even if only `sik` is in the blocked list.
 You can also prefix and suffix an entry with `/` to use a regular expression.
 These regex patterns are matched against the normalized text. For example
 
