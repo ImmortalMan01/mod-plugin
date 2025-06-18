@@ -4,6 +4,7 @@ A simple Paper/Spigot plugin that integrates with OpenAI Moderation API to autom
 
 ## Building
 Requires JDK 21. If the Gradle wrapper JAR is missing, run `gradle wrapper` or use your system Gradle.
+The project depends on the [Snowball stemmer](https://github.com/snowballstem/snowball). Gradle will download this library automatically.
 
 ```
 ./gradlew shadowJar
@@ -85,7 +86,8 @@ Words within a small Levenshtein distance can also trigger the filter. The
 allowed when comparing each token to a blocked word.
 Enable `use-stemming` if you want the filter to also match simple word stems.
 For example a blocked word of `run` will also match `running` or `runner` when
-stemming is active.
+stemming is active. The stemmer supports English and Turkish based on the
+`language` setting.
 You can also prefix and suffix an entry with `/` to use a regular expression.
 These regex patterns are matched against the normalized text. For example
 

@@ -15,6 +15,7 @@ dependencies {
     compileOnly("com.github.booksaw:BetterTeams:4.13.2")
     implementation("com.squareup.okhttp3:okhttp:4.12.0")
     implementation("com.google.code.gson:gson:2.10.1")
+    implementation("com.github.rholder:snowball-stemmer:1.3.0.581.1")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("org.mockito:mockito-core:5.7.0")
