@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 import org.tartarus.snowball.ext.englishStemmer;
 import org.tartarus.snowball.ext.turkishStemmer;
+import me.xdrop.fuzzywuzzy.FuzzySearch;
 
 public class WordFilter {
 
@@ -143,18 +144,18 @@ public class WordFilter {
     }
 
     public static boolean containsBlockedWord(String message, List<String> blockedWords) {
-        return containsBlockedWord(message, blockedWords, 0, false, false);
+        return containsBlockedWord(message, blockedWords, 0, false, false, 0);
     }
 
     public static boolean containsBlockedWord(String message, List<String> blockedWords, int maxDistance) {
-        return containsBlockedWord(message, blockedWords, maxDistance, false, false);
+        return containsBlockedWord(message, blockedWords, maxDistance, false, false, 0);
     }
 
     public static boolean containsBlockedWord(String message, List<String> blockedWords, int maxDistance, boolean useStemming) {
-        return containsBlockedWord(message, blockedWords, maxDistance, useStemming, useStemming && "tr".equals(LANGUAGE));
+        return containsBlockedWord(message, blockedWords, maxDistance, useStemming, useStemming && "tr".equals(LANGUAGE), 0);
     }
 
-    public static boolean containsBlockedWord(String message, List<String> blockedWords, int maxDistance, boolean useStemming, boolean useZemberek) {
+    public static boolean containsBlockedWord(String message, List<String> blockedWords, int maxDistance, boolean useStemming, boolean useZemberek, int fuzzyThreshold) {
         if (message == null) return false;
         Set<String> normalized = new HashSet<>();
         List<Pattern> patterns = new java.util.ArrayList<>();
@@ -165,7 +166,7 @@ public class WordFilter {
                 normalized.add(canonicalize(w));
             }
         }
-        return containsBlockedWord(message, normalized, patterns, true, maxDistance, useStemming, useZemberek);
+        return containsBlockedWord(message, normalized, patterns, true, maxDistance, useStemming, useZemberek, fuzzyThreshold);
     }
 
     /**
@@ -173,26 +174,26 @@ public class WordFilter {
      * is already normalized. This avoids normalizing each word repeatedly.
      */
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, boolean wordsNormalized) {
-        return containsBlockedWord(message, normalizedWords, java.util.Collections.emptyList(), wordsNormalized, 0, false);
+        return containsBlockedWord(message, normalizedWords, java.util.Collections.<Pattern>emptyList(), wordsNormalized, 0, false, false, 0);
     }
 
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, boolean wordsNormalized, int maxDistance) {
-        return containsBlockedWord(message, normalizedWords, java.util.Collections.emptyList(), wordsNormalized, maxDistance, false);
+        return containsBlockedWord(message, normalizedWords, java.util.Collections.<Pattern>emptyList(), wordsNormalized, maxDistance, false, false, 0);
     }
 
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized) {
-        return containsBlockedWord(message, normalizedWords, regexPatterns, wordsNormalized, 0, false);
+        return containsBlockedWord(message, normalizedWords, regexPatterns, wordsNormalized, 0, false, false, 0);
     }
 
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized, int maxDistance) {
-        return containsBlockedWord(message, normalizedWords, regexPatterns, wordsNormalized, maxDistance, false, false);
+        return containsBlockedWord(message, normalizedWords, regexPatterns, wordsNormalized, maxDistance, false, false, 0);
     }
 
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized, int maxDistance, boolean useStemming) {
-        return containsBlockedWord(message, normalizedWords, regexPatterns, wordsNormalized, maxDistance, useStemming, useStemming && "tr".equals(LANGUAGE));
+        return containsBlockedWord(message, normalizedWords, regexPatterns, wordsNormalized, maxDistance, useStemming, useStemming && "tr".equals(LANGUAGE), 0);
     }
 
-    public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized, int maxDistance, boolean useStemming, boolean useZemberek) {
+    public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized, int maxDistance, boolean useStemming, boolean useZemberek, int fuzzyThreshold) {
         if (!wordsNormalized) {
             // Normalize words and patterns
             Set<String> normalized = new HashSet<>();
@@ -204,7 +205,7 @@ public class WordFilter {
                     normalized.add(canonicalize(w));
                 }
             }
-            return containsBlockedWord(message, normalized, patterns, true, maxDistance, useStemming, useZemberek);
+            return containsBlockedWord(message, normalized, patterns, true, maxDistance, useStemming, useZemberek, fuzzyThreshold);
         }
         if (message == null) return false;
         String normalizedMessage = canonicalize(message);
@@ -282,6 +283,13 @@ public class WordFilter {
                         if (Math.abs(ts.length() - sw.length()) > maxDistance) continue;
                         if (levenshtein(ts, sw) <= maxDistance) return true;
                     }
+                }
+            }
+        }
+        if (fuzzyThreshold > 0) {
+            for (String token : words) {
+                for (String w : normalizedWords) {
+                    if (FuzzySearch.partialRatio(token, w) >= fuzzyThreshold) return true;
                 }
             }
         }

@@ -19,6 +19,7 @@ dependencies {
     implementation("com.github.rholder:snowball-stemmer:1.3.0.581.1")
     implementation("zemberek-nlp:zemberek-morphology:0.17.1")
     implementation("zemberek-nlp:zemberek-tokenization:0.17.1")
+    implementation("me.xdrop:fuzzywuzzy:1.4.0")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("org.mockito:mockito-core:5.7.0")

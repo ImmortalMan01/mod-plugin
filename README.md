@@ -85,6 +85,10 @@ also triggers.
 Words within a small Levenshtein distance can also trigger the filter. The
 `blocked-word-distance` option (default `1`) controls how many edits are
 allowed when comparing each token to a blocked word.
+You can enable fuzzy matching by setting `fuzzy-threshold` to a value between
+`0` and `100`. When greater than zero the plugin uses a partial ratio fuzzy
+matcher and mutes messages when the similarity with a blocked word meets or
+exceeds this threshold.
 Enable `use-stemming` if you want the filter to also match simple word stems.
 For example a blocked word of `run` will also match `running` or `runner` when
 stemming is active. The stemmer supports English and Turkish based on the
