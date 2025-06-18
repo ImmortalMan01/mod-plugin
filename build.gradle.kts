@@ -33,6 +33,10 @@ java {
     toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
+tasks.withType<JavaCompile> {
+    options.encoding = "UTF-8"
+}
+
 tasks.named<com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar>("shadowJar") {
     archiveClassifier.set("")
     // Relocation removed due to ASM incompatibility with JDK 21
