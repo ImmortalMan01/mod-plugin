@@ -71,7 +71,8 @@ The filter normalizes text when matching, converting Turkish letters like
 diacritics. Punctuation is converted to spaces so word boundaries are kept.
 Each token is checked against the block list and consecutive single-letter
 tokens are combined, allowing `s i k` to match a blocked word of `sik` while
-digits are mapped to similar letters (for example `s1k` becomes `sik`) and
+digits are mapped to similar letters (for example `s1k` becomes `sik`,
+`s2k` becomes `szk`, `g6k` becomes `ggk`, and `s9k` may match `sgk` or `sqk`) and
 longer letter runs are collapsed so `siiiik` also triggers.
 
 ### GUI Customization

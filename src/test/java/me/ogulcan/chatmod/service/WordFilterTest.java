@@ -46,6 +46,18 @@ public class WordFilterTest {
     }
 
     @Test
+    public void testDigitSubstitutionS2k() {
+        List<String> words = List.of("szk");
+        assertTrue(WordFilter.containsBlockedWord("s2k", words));
+    }
+
+    @Test
+    public void testDigitSubstitutionG6k() {
+        List<String> words = List.of("ggk");
+        assertTrue(WordFilter.containsBlockedWord("g6k", words));
+    }
+
+    @Test
     public void testNormalizedWordList() {
         Set<String> words = List.of("orospu", "piç").stream()
                 .map(WordFilter::canonicalize)
