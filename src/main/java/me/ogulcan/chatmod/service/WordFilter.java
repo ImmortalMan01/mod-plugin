@@ -14,6 +14,8 @@ public class WordFilter {
     // Replace punctuation with spaces but keep letters, digits and whitespace
     private static final Pattern PUNCT = Pattern.compile("[^\\p{L}\\p{Nd}\\s]");
     private static final Pattern WHITESPACE = Pattern.compile("\\s+");
+    // Strip zero width characters which can split words
+    private static final Pattern ZERO_WIDTH = Pattern.compile("[\\u200B\\u200C\\u200D\\uFEFF]");
 
     // Map common confusable characters (e.g. Cyrillic letters) to ASCII
     private static final Map<Character, Character> CONFUSABLE_MAP = Map.ofEntries(
@@ -60,7 +62,8 @@ public class WordFilter {
                 .replace('ı', 'i');
         String nfd = Normalizer.normalize(lower, Normalizer.Form.NFD);
         String withoutDiacritics = DIACRITICS.matcher(nfd).replaceAll("");
-        String withSpaces = PUNCT.matcher(withoutDiacritics).replaceAll(" ");
+        String noZeroWidth = ZERO_WIDTH.matcher(withoutDiacritics).replaceAll("");
+        String withSpaces = PUNCT.matcher(noZeroWidth).replaceAll(" ");
         String base = WHITESPACE.matcher(withSpaces).replaceAll(" ").trim();
 
         StringBuilder replaced = new StringBuilder(base.length());

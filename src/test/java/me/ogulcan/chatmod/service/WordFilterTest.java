@@ -64,6 +64,12 @@ public class WordFilterTest {
     }
 
     @Test
+    public void testZeroWidthCharacters() {
+        List<String> words = List.of("sik");
+        assertTrue(WordFilter.containsBlockedWord("s\u200Bi\u200Bk", words));
+    }
+
+    @Test
     public void testNormalizedWordList() {
         Set<String> words = List.of("orospu", "piç").stream()
                 .map(WordFilter::canonicalize)
