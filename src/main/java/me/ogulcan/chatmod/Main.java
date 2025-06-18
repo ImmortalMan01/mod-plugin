@@ -38,6 +38,8 @@ public class Main extends JavaPlugin {
     private final Map<UUID, BukkitTask> tasks = new HashMap<>();
     private ChatListener chatListener;
     private long configLastModified;
+    private File blockedWordsFile;
+    private long wordsLastModified;
 
     @Override
     public void onEnable() {
@@ -45,6 +47,7 @@ public class Main extends JavaPlugin {
         String lang = getConfig().getString("language", "en");
         this.guiConfig = loadGui(lang);
         this.messages = new Messages(this, lang);
+        java.util.List<String> blockedWords = loadBlockedWords(lang);
         String apiKey = getConfig().getString("openai-key", "");
         double threshold = getConfig().getDouble("threshold", 0.5);
         int rateLimit = getConfig().getInt("rate-limit", 60);
@@ -86,13 +89,14 @@ public class Main extends JavaPlugin {
                 getLogger().warning("Failed to start web server: " + e.getMessage());
             }
         }
-        this.chatListener = new ChatListener(this, moderationService, store, logStore, notifier);
+        this.chatListener = new ChatListener(this, moderationService, store, logStore, notifier, blockedWords);
         getServer().getPluginManager().registerEvents(chatListener, this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
         getServer().getPluginManager().registerEvents(new PrivateMessageListener(this, store), this);
 
         getCommand("cm").setExecutor(new CmCommand(this, store));
         startConfigWatcher(configFile);
+        startWordsWatcher();
     }
 
     public PunishmentStore getStore() {
@@ -138,6 +142,23 @@ public class Main extends JavaPlugin {
         return cfg;
     }
 
+    private java.util.List<String> loadBlockedWords(String lang) {
+        String fileName = "blocked_words_" + lang + ".yml";
+        this.blockedWordsFile = new File(getDataFolder(), fileName);
+        if (!blockedWordsFile.exists()) {
+            saveResource(fileName, false);
+        }
+        FileConfiguration cfg = YamlConfiguration.loadConfiguration(blockedWordsFile);
+        try (java.io.InputStreamReader reader = new java.io.InputStreamReader(getResource(fileName))) {
+            if (reader != null) {
+                YamlConfiguration def = YamlConfiguration.loadConfiguration(reader);
+                cfg.setDefaults(def);
+            }
+        } catch (Exception ignored) {}
+        this.wordsLastModified = blockedWordsFile.lastModified();
+        return cfg.getStringList("blocked-words");
+    }
+
     /**
      * Reload configuration, language and GUI files and re-register listeners
      * with a freshly created {@link ModerationService} instance.
@@ -147,6 +168,7 @@ public class Main extends JavaPlugin {
         String lang = getConfig().getString("language", "en");
         this.messages = new Messages(this, lang);
         this.guiConfig = loadGui(lang);
+        java.util.List<String> blockedWords = loadBlockedWords(lang);
 
         String apiKey = getConfig().getString("openai-key", "");
         double threshold = getConfig().getDouble("threshold", 0.5);
@@ -189,7 +211,7 @@ public class Main extends JavaPlugin {
         }
 
         HandlerList.unregisterAll(this);
-        this.chatListener = new ChatListener(this, moderationService, store, logStore, notifier);
+        this.chatListener = new ChatListener(this, moderationService, store, logStore, notifier, blockedWords);
         getServer().getPluginManager().registerEvents(chatListener, this);
         getServer().getPluginManager().registerEvents(new PlayerListener(this, store), this);
         getServer().getPluginManager().registerEvents(new PrivateMessageListener(this, store), this);
@@ -236,12 +258,25 @@ public class Main extends JavaPlugin {
             long mod = configFile.lastModified();
             if (mod > configLastModified) {
                 configLastModified = mod;
-                List<String> words = YamlConfiguration.loadConfiguration(configFile)
-                        .getStringList("blocked-words");
                 Bukkit.getScheduler().runTask(this, () -> {
                     reloadConfig();
+                    getLogger().info("config.yml reloaded");
+                });
+            }
+        }, 100L, 100L);
+    }
+
+    private void startWordsWatcher() {
+        Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
+            File file = blockedWordsFile;
+            if (file == null) return;
+            long mod = file.lastModified();
+            if (mod > wordsLastModified) {
+                wordsLastModified = mod;
+                java.util.List<String> words = YamlConfiguration.loadConfiguration(file).getStringList("blocked-words");
+                Bukkit.getScheduler().runTask(this, () -> {
                     chatListener.updateBlockedWords(words);
-                    getLogger().info("Blocked words reloaded from config.yml");
+                    getLogger().info("Blocked words reloaded from " + file.getName());
                 });
             }
         }, 100L, 100L);
