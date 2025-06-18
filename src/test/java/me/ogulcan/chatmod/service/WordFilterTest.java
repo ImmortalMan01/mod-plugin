@@ -92,4 +92,16 @@ public class WordFilterTest {
         assertTrue(WordFilter.containsBlockedWord("another badword", words, patterns, true));
     }
 
+    @Test
+    public void testLevenshteinMissingChar() {
+        List<String> words = List.of("sik");
+        assertTrue(WordFilter.containsBlockedWord("s*k", words, 1));
+    }
+
+    @Test
+    public void testLevenshteinSubstitution() {
+        List<String> words = List.of("sik");
+        assertTrue(WordFilter.containsBlockedWord("slk", words, 1));
+    }
+
 }

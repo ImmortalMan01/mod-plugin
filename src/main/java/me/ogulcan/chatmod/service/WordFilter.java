@@ -89,7 +89,33 @@ public class WordFilter {
         return normalize(text, true);
     }
 
+    private static int levenshtein(String s1, String s2) {
+        int m = s1.length();
+        int n = s2.length();
+        int[] prev = new int[n + 1];
+        int[] curr = new int[n + 1];
+        for (int j = 0; j <= n; j++) {
+            prev[j] = j;
+        }
+        for (int i = 1; i <= m; i++) {
+            curr[0] = i;
+            char c1 = s1.charAt(i - 1);
+            for (int j = 1; j <= n; j++) {
+                int cost = c1 == s2.charAt(j - 1) ? 0 : 1;
+                curr[j] = Math.min(Math.min(curr[j - 1] + 1, prev[j] + 1), prev[j - 1] + cost);
+            }
+            int[] tmp = prev;
+            prev = curr;
+            curr = tmp;
+        }
+        return prev[n];
+    }
+
     public static boolean containsBlockedWord(String message, List<String> blockedWords) {
+        return containsBlockedWord(message, blockedWords, 0);
+    }
+
+    public static boolean containsBlockedWord(String message, List<String> blockedWords, int maxDistance) {
         if (message == null) return false;
         Set<String> normalized = new HashSet<>();
         List<Pattern> patterns = new java.util.ArrayList<>();
@@ -100,7 +126,7 @@ public class WordFilter {
                 normalized.add(canonicalize(w));
             }
         }
-        return containsBlockedWord(message, normalized, patterns, true);
+        return containsBlockedWord(message, normalized, patterns, true, maxDistance);
     }
 
     /**
@@ -108,10 +134,18 @@ public class WordFilter {
      * is already normalized. This avoids normalizing each word repeatedly.
      */
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, boolean wordsNormalized) {
-        return containsBlockedWord(message, normalizedWords, java.util.Collections.emptyList(), wordsNormalized);
+        return containsBlockedWord(message, normalizedWords, java.util.Collections.emptyList(), wordsNormalized, 0);
+    }
+
+    public static boolean containsBlockedWord(String message, Set<String> normalizedWords, boolean wordsNormalized, int maxDistance) {
+        return containsBlockedWord(message, normalizedWords, java.util.Collections.emptyList(), wordsNormalized, maxDistance);
     }
 
     public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized) {
+        return containsBlockedWord(message, normalizedWords, regexPatterns, wordsNormalized, 0);
+    }
+
+    public static boolean containsBlockedWord(String message, Set<String> normalizedWords, List<Pattern> regexPatterns, boolean wordsNormalized, int maxDistance) {
         if (!wordsNormalized) {
             // Normalize words and patterns
             Set<String> normalized = new HashSet<>();
@@ -123,7 +157,7 @@ public class WordFilter {
                     normalized.add(canonicalize(w));
                 }
             }
-            return containsBlockedWord(message, normalized, patterns, true);
+            return containsBlockedWord(message, normalized, patterns, true, maxDistance);
         }
         if (message == null) return false;
         String normalizedMessage = canonicalize(message);
@@ -153,6 +187,14 @@ public class WordFilter {
         for (String token : words) {
             if (normalizedWords.stream().anyMatch(token::contains)) {
                 return true;
+            }
+        }
+        if (maxDistance > 0) {
+            for (String token : words) {
+                for (String w : normalizedWords) {
+                    if (Math.abs(token.length() - w.length()) > maxDistance) continue;
+                    if (levenshtein(token, w) <= maxDistance) return true;
+                }
             }
         }
         return false;

@@ -77,6 +77,9 @@ tokens are combined, allowing `s i k` to match a blocked word of `sik` while
 digits are mapped to similar letters (for example `s1k` becomes `sik`,
 `s2k` becomes `szk`, `g6k` becomes `ggk`, and `s9k` may match `sgk` or `sqk`) and
 longer letter runs are collapsed so `siiiik` also triggers.
+Words within a small Levenshtein distance can also trigger the filter. The
+`blocked-word-distance` option (default `1`) controls how many edits are
+allowed when comparing each token to a blocked word.
 You can also prefix and suffix an entry with `/` to use a regular expression.
 These regex patterns are matched against the normalized text. For example
 `/bad(word)?/` would block both `bad` and `badword`.

@@ -81,6 +81,7 @@ save-interval-ticks: 100
 use-blocked-categories: true
 # When true, messages are scanned against the blocked-words list before using the API
 use-blocked-words: true
+blocked-word-distance: 1
 blocked-words:
   - amk
   - orospu
