@@ -42,6 +42,17 @@ For reasoning models (`o3`, `o4-mini`), the `thinking-effort` option controls
 the reasoning effort used (`low`, `medium`, or `high`). These models have no
 token limit, while standard chat models are capped at **five** tokens to avoid
 OpenAI errors.
+### Choosing a Model
+
+See [MODEL_GUIDE.md](MODEL_GUIDE.md) for a quick reference on each model.
+
+- **omni-moderation-latest** – fast and inexpensive moderation endpoint (default).
+- **gpt-4.1-mini** – lightweight chat model for extra nuance at a lower cost.
+- **gpt-4.1** – more capable chat model offering the highest accuracy.
+- **o3** – reasoning model with no token limit, suitable for complex messages.
+- **o4-mini** – faster reasoning model that still handles nuanced cases.
+
+Increase `thinking-effort` if you pick `o3` or `o4-mini` for better results.
 All categories supported by this model are included in `blocked-categories`:
 
 ```
