@@ -88,7 +88,7 @@ public class ChatListener implements Listener {
         UUID uuid = player.getUniqueId();
         if (store.isMuted(uuid)) {
             long rem = store.remaining(uuid) / 1000;
-            player.sendMessage(plugin.getMessages().get("still-muted", format(rem)));
+            player.sendMessage(plugin.getMessages().prefixed("still-muted", format(rem)));
             event.setCancelled(true);
             return;
         }
@@ -132,7 +132,7 @@ public class ChatListener implements Listener {
             minutes = plugin.getConfig().getLong("punishments.third", 60);
         } else {
             minutes = plugin.getConfig().getLong("punishments.fourth", 180);
-            String msg = plugin.getMessages().get("repeated-offence", player.getName());
+            String msg = plugin.getMessages().prefixed("repeated-offence", player.getName());
             Bukkit.getOnlinePlayers().stream()
                     .filter(p -> p.hasPermission("chatmoderation.notify"))
                     .forEach(p -> p.sendMessage(msg));
@@ -142,12 +142,12 @@ public class ChatListener implements Listener {
         String autoReason = plugin.getMessages().get("auto-detection");
         logStore.add(uuid, player.getName(), autoReason, "auto", sys, minutes);
         plugin.scheduleUnmute(uuid, minutes * 60L * 20L);
-        player.sendMessage(plugin.getMessages().get("muted-player", minutes));
+        player.sendMessage(plugin.getMessages().prefixed("muted-player", minutes));
 
         // Broadcast mute information to all players
         int offences = store.offenceCount(uuid, Duration.ofHours(24).toMillis());
         long remaining = store.remaining(uuid) / 1000;
-        String broadcast = plugin.getMessages().get(
+        String broadcast = plugin.getMessages().prefixed(
                 "mute-broadcast",
                 player.getName(),
                 offences,

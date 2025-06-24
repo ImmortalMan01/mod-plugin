@@ -27,6 +27,7 @@ The plugin generates `config.yml` on first run. **You must replace** the `openai
 value with your own API key or moderation requests will be skipped. Adjust
 thresholds or punishments as needed.
 Set `language` to `en` or `tr` to change plugin messages. The selected language file (`messages_en.yml` or `messages_tr.yml`) will be copied to the plugin folder so you can edit any text.
+Use the `prefix` option to customize the text added before all chat messages sent by the plugin.
 Enable `debug: true` in `config.yml` to log moderation responses and the selected moderation model for troubleshooting.
 Set `countdown-offline` to `false` if you want mute timers to pause while muted players are offline.
 Muted players are also blocked from using private messaging commands like `/msg`.

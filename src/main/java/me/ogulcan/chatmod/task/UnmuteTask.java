@@ -25,7 +25,7 @@ public class UnmuteTask extends BukkitRunnable {
         plugin.cancelUnmute(uuid);
         Player player = Bukkit.getPlayer(uuid);
         if (player != null) {
-            player.sendMessage(plugin.getMessages().get("mute-expired"));
+            player.sendMessage(plugin.getMessages().prefixed("mute-expired"));
         }
     }
 }
