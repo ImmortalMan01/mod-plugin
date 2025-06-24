@@ -1,7 +1,13 @@
 openai-key: "REPLACE_ME"
 language: en
 prefix: "&7[ChatModeration] &r"
-# Set to 'gpt-4.1-mini', 'gpt-4.1', 'o3' or 'o4-mini' to use the chat model with a profanity check prompt
+# Available models:
+#  omni-moderation-latest - default moderation endpoint, fast and cheap
+#  gpt-4.1-mini          - lightweight chat model for extra nuance
+#  gpt-4.1               - full chat model with higher accuracy
+#  o3                    - reasoning model, no token limit
+#  o4-mini               - faster but still reasoning capable
+# Set one of these to use the chat completion API instead of the moderation endpoint
 model: omni-moderation-latest
 # Prompt used by the chat model
 chat-prompt: "Sen minecraft sohbet moderatörüsün. Görevin Türkçe cümlede küfür veya hakaret varsa sadece var yoksa yok yaz (lan, altıma sıçtım gibi basit argo kelimeleri ve lezyiyen gibi nicknameleri ve minecraft sunucularında kullanılan terimleri görmezden gel sadece kullanıcıların birbirlerine doğrudan küfür ve hakaret emlerine izin vermeyeceksin) (kullanıcı küfürü gizlemek için özel karakterler veya sansürler kullanmış olabilir dikkat et):"
