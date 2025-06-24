@@ -202,6 +202,16 @@ public class DashboardGUI implements Listener {
                             openingNew = true;
                             viewer.openInventory(inventory);
                         }
+                        case "words" -> {
+                            openingNew = true;
+                            if (e.isLeftClick()) {
+                                new AddWordGUI(plugin, viewer);
+                            } else if (e.isRightClick()) {
+                                new WordListGUI(plugin, viewer);
+                            } else {
+                                openingNew = false;
+                            }
+                        }
                         }
                     }
                 }
