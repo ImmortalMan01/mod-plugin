@@ -42,11 +42,17 @@ public class AddWordGUI implements Listener {
     @EventHandler
     public void onPrepare(PrepareAnvilEvent e) {
         if (!e.getInventory().equals(inventory)) return;
-        ItemStack result = e.getResult();
-        if (result != null && result.hasItemMeta() && result.getItemMeta().hasDisplayName()) {
-            renameText = ChatColor.stripColor(result.getItemMeta().getDisplayName());
+        renameText = e.getInventory().getRenameText();
+        ItemStack base = e.getInventory().getItem(0);
+        if (base != null && renameText != null && !renameText.isBlank()) {
+            ItemStack result = base.clone();
+            ItemMeta meta = result.getItemMeta();
+            meta.setDisplayName(renameText);
+            result.setItemMeta(meta);
+            e.setResult(result);
+            e.getInventory().setRepairCost(0);
         } else {
-            renameText = null;
+            e.setResult(null);
         }
     }
 
