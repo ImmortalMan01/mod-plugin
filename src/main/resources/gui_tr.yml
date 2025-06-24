@@ -24,6 +24,14 @@ main:
       material: WRITABLE_BOOK
       name: "&eLogları Gör"
       action: logs
+    words:
+      slot: 53
+      material: ANVIL
+      name: "&eEngelli Kelimeler"
+      lore:
+        - "&7Sol tık: ekle"
+        - "&7Sağ tık: liste"
+      action: words
     clear-logs:
       slot: 44
       material: LAVA_BUCKET

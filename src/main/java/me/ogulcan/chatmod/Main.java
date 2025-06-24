@@ -256,6 +256,51 @@ public class Main extends JavaPlugin {
         if (task != null) task.cancel();
     }
 
+    public synchronized boolean addBlockedWord(String word) {
+        if (blockedWordsFile == null) return false;
+        org.bukkit.configuration.file.YamlConfiguration cfg =
+                org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(blockedWordsFile);
+        java.util.List<String> words = cfg.getStringList("blocked-words");
+        String canon = me.ogulcan.chatmod.service.WordFilter.canonicalize(word);
+        for (String w : words) {
+            if (me.ogulcan.chatmod.service.WordFilter.canonicalize(w).equals(canon)) {
+                return false;
+            }
+        }
+        words.add(word);
+        cfg.set("blocked-words", words);
+        try { cfg.save(blockedWordsFile); } catch (Exception ignored) {}
+        wordsLastModified = blockedWordsFile.lastModified();
+        if (chatListener != null) chatListener.updateBlockedWords(words);
+        return true;
+    }
+
+    public synchronized boolean removeBlockedWord(String word) {
+        if (blockedWordsFile == null) return false;
+        org.bukkit.configuration.file.YamlConfiguration cfg =
+                org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(blockedWordsFile);
+        java.util.List<String> words = cfg.getStringList("blocked-words");
+        String canon = me.ogulcan.chatmod.service.WordFilter.canonicalize(word);
+        String found = null;
+        for (String w : words) {
+            if (me.ogulcan.chatmod.service.WordFilter.canonicalize(w).equals(canon)) {
+                found = w;
+                break;
+            }
+        }
+        if (found == null) return false;
+        words.remove(found);
+        cfg.set("blocked-words", words);
+        try { cfg.save(blockedWordsFile); } catch (Exception ignored) {}
+        wordsLastModified = blockedWordsFile.lastModified();
+        if (chatListener != null) chatListener.updateBlockedWords(words);
+        return true;
+    }
+
+    public java.io.File getBlockedWordsFile() {
+        return blockedWordsFile;
+    }
+
     private void startConfigWatcher(File configFile) {
         Bukkit.getScheduler().runTaskTimerAsynchronously(this, () -> {
             long mod = configFile.lastModified();

@@ -24,6 +24,14 @@ main:
       material: WRITABLE_BOOK
       name: "&eView Logs"
       action: logs
+    words:
+      slot: 53
+      material: ANVIL
+      name: "&eBlocked Words"
+      lore:
+        - "&7Left: add new"
+        - "&7Right: manage"
+      action: words
     clear-logs:
       slot: 44
       material: LAVA_BUCKET
