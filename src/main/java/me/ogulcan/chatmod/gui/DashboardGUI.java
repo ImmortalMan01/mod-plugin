@@ -170,28 +170,28 @@ public class DashboardGUI implements Listener {
                             openingNew = true;
                             new LogsGUI(plugin, plugin.getLogStore(), viewer);
                         } else {
-                            viewer.sendMessage(plugin.getMessages().get("no-permission"));
+                            viewer.sendMessage(plugin.getMessages().prefixed("no-permission"));
                         }
                     } else if (viewer.hasPermission("chatmoderation.admin")) {
                         switch (btn.action) {
                         case "reload" -> {
                             plugin.reloadFiles();
                             this.gui = plugin.getGuiConfig();
-                            viewer.sendMessage(plugin.getMessages().get("reloaded"));
+                            viewer.sendMessage(plugin.getMessages().prefixed("reloaded"));
                             createMain();
                             openingNew = true;
                             viewer.openInventory(inventory);
                         }
                         case "clear" -> {
                             store.clear();
-                            viewer.sendMessage(plugin.getMessages().get("history-cleared"));
+                            viewer.sendMessage(plugin.getMessages().prefixed("history-cleared"));
                             createMain();
                             openingNew = true;
                             viewer.openInventory(inventory);
                         }
                         case "clear-logs" -> {
                             plugin.getLogStore().clear();
-                            viewer.sendMessage(plugin.getMessages().get("logs-cleared"));
+                            viewer.sendMessage(plugin.getMessages().prefixed("logs-cleared"));
                             createMain();
                             openingNew = true;
                             viewer.openInventory(inventory);

@@ -24,14 +24,14 @@ public class CmCommand implements CommandExecutor {
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
         if (args.length == 0) {
-            sender.sendMessage(plugin.getMessages().get("commands-title"));
-            sender.sendMessage(plugin.getMessages().get("command-mute"));
-            sender.sendMessage(plugin.getMessages().get("command-unmute"));
-            sender.sendMessage(plugin.getMessages().get("command-status"));
-            sender.sendMessage(plugin.getMessages().get("command-reload"));
-            sender.sendMessage(plugin.getMessages().get("command-gui"));
-            sender.sendMessage(plugin.getMessages().get("command-logs"));
-            sender.sendMessage(plugin.getMessages().get("command-clearlogs"));
+            sender.sendMessage(plugin.getMessages().prefixed("commands-title"));
+            sender.sendMessage(plugin.getMessages().prefixed("command-mute"));
+            sender.sendMessage(plugin.getMessages().prefixed("command-unmute"));
+            sender.sendMessage(plugin.getMessages().prefixed("command-status"));
+            sender.sendMessage(plugin.getMessages().prefixed("command-reload"));
+            sender.sendMessage(plugin.getMessages().prefixed("command-gui"));
+            sender.sendMessage(plugin.getMessages().prefixed("command-logs"));
+            sender.sendMessage(plugin.getMessages().prefixed("command-clearlogs"));
             return true;
         }
         String sub = args[0].toLowerCase();
@@ -58,19 +58,19 @@ public class CmCommand implements CommandExecutor {
 
     private boolean mute(CommandSender sender, String[] args) {
         if (args.length < 2) {
-            sender.sendMessage(plugin.getMessages().get("usage-mute"));
+            sender.sendMessage(plugin.getMessages().prefixed("usage-mute"));
             return true;
         }
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(plugin.getMessages().get("player-not-found"));
+            sender.sendMessage(plugin.getMessages().prefixed("player-not-found"));
             return true;
         }
         long minutes;
         try {
             minutes = Long.parseLong(args[1]);
         } catch (NumberFormatException e) {
-            sender.sendMessage(plugin.getMessages().get("invalid-minutes"));
+            sender.sendMessage(plugin.getMessages().prefixed("invalid-minutes"));
             return true;
         }
         String reason = args.length > 2 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : "";
@@ -80,58 +80,58 @@ public class CmCommand implements CommandExecutor {
         plugin.getLogStore().add(target.getUniqueId(), target.getName(), r, "game", actor, minutes);
         plugin.getNotifier().notifyMute(target.getName(), r, minutes, actor, "game", System.currentTimeMillis());
         plugin.scheduleUnmute(target.getUniqueId(), minutes * 60L * 20L);
-        sender.sendMessage(plugin.getMessages().get("muted", target.getName(), minutes));
+        sender.sendMessage(plugin.getMessages().prefixed("muted", target.getName(), minutes));
         return true;
     }
 
     private boolean unmute(CommandSender sender, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(plugin.getMessages().get("usage-unmute"));
+            sender.sendMessage(plugin.getMessages().prefixed("usage-unmute"));
             return true;
         }
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(plugin.getMessages().get("player-not-found"));
+            sender.sendMessage(plugin.getMessages().prefixed("player-not-found"));
             return true;
         }
         store.unmute(target.getUniqueId());
         plugin.cancelUnmute(target.getUniqueId());
-        sender.sendMessage(plugin.getMessages().get("unmuted", target.getName()));
+        sender.sendMessage(plugin.getMessages().prefixed("unmuted", target.getName()));
         return true;
     }
 
     private boolean status(CommandSender sender, String[] args) {
         if (args.length < 1) {
-            sender.sendMessage(plugin.getMessages().get("usage-status"));
+            sender.sendMessage(plugin.getMessages().prefixed("usage-status"));
             return true;
         }
         Player target = Bukkit.getPlayer(args[0]);
         if (target == null) {
-            sender.sendMessage(plugin.getMessages().get("player-not-found"));
+            sender.sendMessage(plugin.getMessages().prefixed("player-not-found"));
             return true;
         }
         if (store.isMuted(target.getUniqueId())) {
             long rem = store.remaining(target.getUniqueId()) / 1000;
-            sender.sendMessage(plugin.getMessages().get("remaining-mute", target.getName(), rem / 60, rem % 60));
+            sender.sendMessage(plugin.getMessages().prefixed("remaining-mute", target.getName(), rem / 60, rem % 60));
         } else {
-            sender.sendMessage(plugin.getMessages().get("not-muted", target.getName()));
+            sender.sendMessage(plugin.getMessages().prefixed("not-muted", target.getName()));
         }
         return true;
     }
 
     private boolean reload(CommandSender sender) {
         plugin.reloadAll();
-        sender.sendMessage(plugin.getMessages().get("reloaded"));
+        sender.sendMessage(plugin.getMessages().prefixed("reloaded"));
         return true;
     }
 
     private boolean gui(CommandSender sender) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(plugin.getMessages().get("only-players"));
+            sender.sendMessage(plugin.getMessages().prefixed("only-players"));
             return true;
         }
         if (!player.hasPermission("chatmoderation.gui")) {
-            sender.sendMessage(plugin.getMessages().get("no-permission"));
+            sender.sendMessage(plugin.getMessages().prefixed("no-permission"));
             return true;
         }
         new DashboardGUI(plugin, store, plugin.getGuiConfig(), player).open();
@@ -140,11 +140,11 @@ public class CmCommand implements CommandExecutor {
 
     private boolean logs(CommandSender sender) {
         if (!(sender instanceof Player player)) {
-            sender.sendMessage(plugin.getMessages().get("only-players"));
+            sender.sendMessage(plugin.getMessages().prefixed("only-players"));
             return true;
         }
         if (!player.hasPermission("chatmoderation.logs")) {
-            sender.sendMessage(plugin.getMessages().get("no-permission"));
+            sender.sendMessage(plugin.getMessages().prefixed("no-permission"));
             return true;
         }
         new LogsGUI(plugin, plugin.getLogStore(), player);
@@ -153,7 +153,7 @@ public class CmCommand implements CommandExecutor {
 
     private boolean clearLogs(CommandSender sender) {
         plugin.getLogStore().clear();
-        sender.sendMessage(plugin.getMessages().get("logs-cleared"));
+        sender.sendMessage(plugin.getMessages().prefixed("logs-cleared"));
         return true;
     }
 }

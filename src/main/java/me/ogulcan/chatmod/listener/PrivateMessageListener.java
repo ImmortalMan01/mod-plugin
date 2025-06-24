@@ -33,7 +33,7 @@ public class PrivateMessageListener implements Listener {
         UUID uuid = player.getUniqueId();
         if (store.isMuted(uuid)) {
             long rem = store.remaining(uuid) / 1000;
-            player.sendMessage(plugin.getMessages().get("still-muted", format(rem)));
+            player.sendMessage(plugin.getMessages().prefixed("still-muted", format(rem)));
             event.setCancelled(true);
         }
     }

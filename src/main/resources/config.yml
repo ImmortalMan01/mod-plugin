@@ -1,5 +1,6 @@
 openai-key: "REPLACE_ME"
 language: en
+prefix: "&7[ChatModeration] &r"
 # Set to 'gpt-4.1-mini', 'gpt-4.1', 'o3' or 'o4-mini' to use the chat model with a profanity check prompt
 model: omni-moderation-latest
 # Prompt used by the chat model
