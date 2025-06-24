@@ -261,7 +261,12 @@ public class Main extends JavaPlugin {
         org.bukkit.configuration.file.YamlConfiguration cfg =
                 org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(blockedWordsFile);
         java.util.List<String> words = cfg.getStringList("blocked-words");
-        if (words.contains(word)) return false;
+        String canon = me.ogulcan.chatmod.service.WordFilter.canonicalize(word);
+        for (String w : words) {
+            if (me.ogulcan.chatmod.service.WordFilter.canonicalize(w).equals(canon)) {
+                return false;
+            }
+        }
         words.add(word);
         cfg.set("blocked-words", words);
         try { cfg.save(blockedWordsFile); } catch (Exception ignored) {}
@@ -275,7 +280,16 @@ public class Main extends JavaPlugin {
         org.bukkit.configuration.file.YamlConfiguration cfg =
                 org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(blockedWordsFile);
         java.util.List<String> words = cfg.getStringList("blocked-words");
-        if (!words.remove(word)) return false;
+        String canon = me.ogulcan.chatmod.service.WordFilter.canonicalize(word);
+        String found = null;
+        for (String w : words) {
+            if (me.ogulcan.chatmod.service.WordFilter.canonicalize(w).equals(canon)) {
+                found = w;
+                break;
+            }
+        }
+        if (found == null) return false;
+        words.remove(found);
         cfg.set("blocked-words", words);
         try { cfg.save(blockedWordsFile); } catch (Exception ignored) {}
         wordsLastModified = blockedWordsFile.lastModified();

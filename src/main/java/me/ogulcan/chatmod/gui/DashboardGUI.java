@@ -93,22 +93,32 @@ public class DashboardGUI implements Listener {
         ConfigurationSection buttons = gui.getConfigurationSection("main.buttons");
         if (buttons != null) {
             for (String key : buttons.getKeys(false)) {
-                int slot = buttons.getInt(key + ".slot");
-                String matName = buttons.getString(key + ".material", "STONE");
+                ConfigurationSection sec = buttons.getConfigurationSection(key);
+                int slot = sec.getInt("slot");
+                String matName = sec.getString("material", "STONE");
                 Material mat = Material.matchMaterial(matName);
                 if (mat == null) mat = Material.STONE;
-                String action = buttons.getString(key + ".action", "");
+                String action = sec.getString("action", "");
                 String name;
                 if ("toggle-automute".equals(action)) {
-                    String on = buttons.getString(key + ".name-on", "Auto-Mute ON");
-                    String off = buttons.getString(key + ".name-off", "Auto-Mute OFF");
+                    String on = sec.getString("name-on", "Auto-Mute ON");
+                    String off = sec.getString("name-off", "Auto-Mute OFF");
                     name = plugin.isAutoMute() ? on : off;
                 } else {
-                    name = buttons.getString(key + ".name", key);
+                    name = sec.getString("name", key);
                 }
                 name = ChatColor.translateAlternateColorCodes('&', name);
-                inventory.setItem(slot, item(mat, name));
-                mainButtons.put(slot, new ButtonInfo(action, buttons.getInt(key + ".value", 0)));
+                java.util.List<String> lore = sec.getStringList("lore");
+                if (lore != null && !lore.isEmpty()) {
+                    java.util.List<String> list = new java.util.ArrayList<>(lore.size());
+                    for (String line : lore) {
+                        list.add(ChatColor.translateAlternateColorCodes('&', line));
+                    }
+                    inventory.setItem(slot, item(mat, name, list));
+                } else {
+                    inventory.setItem(slot, item(mat, name, null));
+                }
+                mainButtons.put(slot, new ButtonInfo(action, sec.getInt("value", 0)));
             }
         }
     }
@@ -127,17 +137,18 @@ public class DashboardGUI implements Listener {
                 String name = ChatColor.translateAlternateColorCodes('&', buttons.getString(key + ".name", key));
                 String action = buttons.getString(key + ".action", "");
                 int value = buttons.getInt(key + ".value", 0);
-                inv.setItem(slot, item(mat, name));
+                inv.setItem(slot, item(mat, name, null));
                 playerButtons.put(slot, new ButtonInfo(action, value));
             }
         }
         return inv;
     }
 
-    private ItemStack item(Material mat, String name) {
+    private ItemStack item(Material mat, String name, java.util.List<String> lore) {
         ItemStack item = new ItemStack(mat);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(name);
+        if (lore != null && !lore.isEmpty()) meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
     }

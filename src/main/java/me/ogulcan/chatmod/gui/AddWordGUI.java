@@ -57,7 +57,7 @@ public class AddWordGUI implements Listener {
         if (e.getRawSlot() == 2) {
             e.setCancelled(true);
             if (renameText != null && !renameText.isBlank()) {
-                boolean added = plugin.addBlockedWord(renameText.toLowerCase());
+                boolean added = plugin.addBlockedWord(renameText);
                 if (added) {
                     viewer.sendMessage(plugin.getMessages().prefixed("word-added", renameText));
                 } else {

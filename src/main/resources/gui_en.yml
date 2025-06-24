@@ -25,9 +25,12 @@ main:
       name: "&eView Logs"
       action: logs
     words:
-      slot: 42
+      slot: 53
       material: ANVIL
       name: "&eBlocked Words"
+      lore:
+        - "&7Left-click: add"
+        - "&7Right-click: list"
       action: words
     clear-logs:
       slot: 44

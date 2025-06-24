@@ -25,9 +25,12 @@ main:
       name: "&eLogları Gör"
       action: logs
     words:
-      slot: 42
+      slot: 53
       material: ANVIL
       name: "&eEngelli Kelimeler"
+      lore:
+        - "&7Sol tık: ekle"
+        - "&7Sağ tık: liste"
       action: words
     clear-logs:
       slot: 44
