@@ -13,7 +13,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
-import com.destroystokyo.paper.event.inventory.PrepareResultEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.inventory.InventoryType.SlotType;
@@ -42,6 +41,7 @@ public class AddWordGUI implements Listener {
         inventory.setItem(0, paper);
         viewer.openInventory(inventory);
         Bukkit.getPluginManager().registerEvents(this, plugin);
+        registerPaperListener();
         this.saved = false;
     }
 
@@ -51,12 +51,6 @@ public class AddWordGUI implements Listener {
         handlePrepare(e.getInventory(), e);
     }
 
-    @EventHandler
-    public void onPreparePaper(PrepareResultEvent e) {
-        if (e.getInventory().getType() != InventoryType.ANVIL) return;
-        if (!e.getInventory().equals(inventory)) return;
-        handlePrepare((AnvilInventory) e.getInventory(), e);
-    }
 
     private void handlePrepare(AnvilInventory inv, org.bukkit.event.Event parent) {
         renameText = inv.getRenameText();
@@ -71,8 +65,11 @@ public class AddWordGUI implements Listener {
         }
         if (parent instanceof PrepareAnvilEvent pae) {
             pae.setResult(result);
-        } else if (parent instanceof PrepareResultEvent pre) {
-            pre.setResult(result);
+        } else if (parent.getClass().getName().equals("com.destroystokyo.paper.event.inventory.PrepareResultEvent")) {
+            try {
+                parent.getClass().getMethod("setResult", ItemStack.class).invoke(parent, result);
+            } catch (ReflectiveOperationException ignored) {
+            }
         }
     }
 
@@ -130,5 +127,30 @@ public class AddWordGUI implements Listener {
             }
         }
         HandlerList.unregisterAll(this);
+    }
+
+    @SuppressWarnings("unchecked")
+    private void registerPaperListener() {
+        try {
+            Class<? extends org.bukkit.event.Event> clazz =
+                (Class<? extends org.bukkit.event.Event>) Class.forName("com.destroystokyo.paper.event.inventory.PrepareResultEvent");
+            org.bukkit.Bukkit.getPluginManager().registerEvent(
+                    clazz,
+                    this,
+                    org.bukkit.event.EventPriority.NORMAL,
+                    (listener, event) -> {
+                        try {
+                            Object inventory = event.getClass().getMethod("getInventory").invoke(event);
+                            if (inventory instanceof org.bukkit.inventory.AnvilInventory anv && inventory.equals(this.inventory)) {
+                                handlePrepare(anv, (org.bukkit.event.Event) event);
+                            }
+                        } catch (Exception ignored) {
+                        }
+                    },
+                    plugin,
+                    true);
+        } catch (ClassNotFoundException ignored) {
+            // Paper event not present
+        }
     }
 }
