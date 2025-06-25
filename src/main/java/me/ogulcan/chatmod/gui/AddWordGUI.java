@@ -65,9 +65,10 @@ public class AddWordGUI implements Listener {
         if (!e.getView().getTopInventory().equals(inventory)) return;
         if (e.getRawSlot() == 2) {
             e.setCancelled(true);
-            AnvilInventory anvil = (AnvilInventory) e.getView().getTopInventory();
-            String text = anvil.getRenameText();
-            if (text != null) renameText = text;
+            if (e.getView().getTopInventory() instanceof AnvilInventory anvil) {
+                String text = anvil.getRenameText();
+                if (text != null) renameText = text;
+            }
             if (renameText != null && !renameText.isBlank()) {
                 boolean added = plugin.addBlockedWord(renameText);
                 saved = true;
