@@ -14,6 +14,7 @@ import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
@@ -64,6 +65,9 @@ public class AddWordGUI implements Listener {
         if (!e.getView().getTopInventory().equals(inventory)) return;
         if (e.getRawSlot() == 2) {
             e.setCancelled(true);
+            AnvilInventory anvil = (AnvilInventory) e.getView().getTopInventory();
+            String text = anvil.getRenameText();
+            if (text != null) renameText = text;
             if (renameText != null && !renameText.isBlank()) {
                 boolean added = plugin.addBlockedWord(renameText);
                 saved = true;
@@ -95,6 +99,10 @@ public class AddWordGUI implements Listener {
     @EventHandler
     public void onClose(InventoryCloseEvent e) {
         if (e.getPlayer() != viewer) return;
+        if (e.getInventory() instanceof AnvilInventory anvil) {
+            String text = anvil.getRenameText();
+            if (text != null) renameText = text;
+        }
         if (!saved && renameText != null && !renameText.isBlank()) {
             boolean added = plugin.addBlockedWord(renameText);
             if (added) {
