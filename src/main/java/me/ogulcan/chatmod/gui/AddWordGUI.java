@@ -25,6 +25,7 @@ public class AddWordGUI implements Listener {
     private final Player viewer;
     private final Inventory inventory;
     private String renameText;
+    private boolean saved;
 
     public AddWordGUI(Main plugin, Player viewer) {
         this.plugin = plugin;
@@ -37,6 +38,7 @@ public class AddWordGUI implements Listener {
         inventory.setItem(0, paper);
         viewer.openInventory(inventory);
         Bukkit.getPluginManager().registerEvents(this, plugin);
+        this.saved = false;
     }
 
     @EventHandler
@@ -64,6 +66,7 @@ public class AddWordGUI implements Listener {
             e.setCancelled(true);
             if (renameText != null && !renameText.isBlank()) {
                 boolean added = plugin.addBlockedWord(renameText);
+                saved = true;
                 if (added) {
                     viewer.sendMessage(plugin.getMessages().prefixed("word-added", renameText));
                 } else {
@@ -92,6 +95,14 @@ public class AddWordGUI implements Listener {
     @EventHandler
     public void onClose(InventoryCloseEvent e) {
         if (e.getPlayer() != viewer) return;
+        if (!saved && renameText != null && !renameText.isBlank()) {
+            boolean added = plugin.addBlockedWord(renameText);
+            if (added) {
+                viewer.sendMessage(plugin.getMessages().prefixed("word-added", renameText));
+            } else {
+                viewer.sendMessage(plugin.getMessages().prefixed("word-exists"));
+            }
+        }
         HandlerList.unregisterAll(this);
     }
 }
