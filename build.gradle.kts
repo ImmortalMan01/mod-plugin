@@ -7,6 +7,7 @@ repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
     maven("https://jitpack.io")
+    maven("https://repo.codemc.org/repository/maven-public/")
     maven("https://raw.githubusercontent.com/ahmetaa/maven-repo/master")
 }
 
@@ -20,7 +21,7 @@ dependencies {
     implementation("zemberek-nlp:zemberek-morphology:0.17.1")
     implementation("zemberek-nlp:zemberek-tokenization:0.17.1")
     implementation("me.xdrop:fuzzywuzzy:1.4.0")
-    implementation("net.wesjd:anvilgui:<latest-version>")
+    implementation("net.wesjd:anvilgui:1.10.6-SNAPSHOT")
     testImplementation("org.junit.jupiter:junit-jupiter:5.10.0")
     testImplementation("com.squareup.okhttp3:mockwebserver:4.12.0")
     testImplementation("org.mockito:mockito-core:5.7.0")
