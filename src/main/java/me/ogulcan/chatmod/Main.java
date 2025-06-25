@@ -256,8 +256,8 @@ public class Main extends JavaPlugin {
         if (task != null) task.cancel();
     }
 
-    public synchronized boolean addBlockedWord(String word) {
-        if (blockedWordsFile == null) return false;
+    public synchronized AddWordResult addBlockedWord(String word) {
+        if (blockedWordsFile == null) return AddWordResult.ERROR;
         if (!blockedWordsFile.getParentFile().exists()) {
             blockedWordsFile.getParentFile().mkdirs();
         }
@@ -267,7 +267,7 @@ public class Main extends JavaPlugin {
         String canon = me.ogulcan.chatmod.service.WordFilter.canonicalize(word);
         for (String w : words) {
             if (me.ogulcan.chatmod.service.WordFilter.canonicalize(w).equals(canon)) {
-                return false;
+                return AddWordResult.EXISTS;
             }
         }
         words.add(word);
@@ -276,10 +276,11 @@ public class Main extends JavaPlugin {
             cfg.save(blockedWordsFile);
         } catch (Exception e) {
             getLogger().warning("Failed to save blocked words: " + e.getMessage());
+            return AddWordResult.ERROR;
         }
         wordsLastModified = blockedWordsFile.lastModified();
         if (chatListener != null) chatListener.updateBlockedWords(words);
-        return true;
+        return AddWordResult.ADDED;
     }
 
     public synchronized boolean removeBlockedWord(String word) {
