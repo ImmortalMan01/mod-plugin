@@ -47,7 +47,7 @@ public class AddWordGUI implements Listener {
 
     @EventHandler
     public void onPrepare(PrepareAnvilEvent e) {
-        if (!e.getInventory().equals(inventory)) return;
+        if (!e.getView().getTopInventory().equals(inventory)) return;
         handlePrepare(e.getInventory(), e);
     }
 
