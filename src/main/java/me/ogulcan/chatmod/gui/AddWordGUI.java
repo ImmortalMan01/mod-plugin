@@ -1,6 +1,7 @@
 package me.ogulcan.chatmod.gui;
 
 import me.ogulcan.chatmod.Main;
+import me.ogulcan.chatmod.AddWordResult;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -70,12 +71,12 @@ public class AddWordGUI implements Listener {
                 if (text != null) renameText = text;
             }
             if (renameText != null && !renameText.isBlank()) {
-                boolean added = plugin.addBlockedWord(renameText);
+                me.ogulcan.chatmod.AddWordResult result = plugin.addBlockedWord(renameText);
                 saved = true;
-                if (added) {
-                    viewer.sendMessage(plugin.getMessages().prefixed("word-added", renameText));
-                } else {
-                    viewer.sendMessage(plugin.getMessages().prefixed("word-exists"));
+                switch (result) {
+                    case ADDED -> viewer.sendMessage(plugin.getMessages().prefixed("word-added", renameText));
+                    case EXISTS -> viewer.sendMessage(plugin.getMessages().prefixed("word-exists"));
+                    case ERROR -> viewer.sendMessage(plugin.getMessages().prefixed("word-add-failed"));
                 }
             }
             viewer.closeInventory();
@@ -105,11 +106,11 @@ public class AddWordGUI implements Listener {
             if (text != null) renameText = text;
         }
         if (!saved && renameText != null && !renameText.isBlank()) {
-            boolean added = plugin.addBlockedWord(renameText);
-            if (added) {
-                viewer.sendMessage(plugin.getMessages().prefixed("word-added", renameText));
-            } else {
-                viewer.sendMessage(plugin.getMessages().prefixed("word-exists"));
+            me.ogulcan.chatmod.AddWordResult result = plugin.addBlockedWord(renameText);
+            switch (result) {
+                case ADDED -> viewer.sendMessage(plugin.getMessages().prefixed("word-added", renameText));
+                case EXISTS -> viewer.sendMessage(plugin.getMessages().prefixed("word-exists"));
+                case ERROR -> viewer.sendMessage(plugin.getMessages().prefixed("word-add-failed"));
             }
         }
         HandlerList.unregisterAll(this);

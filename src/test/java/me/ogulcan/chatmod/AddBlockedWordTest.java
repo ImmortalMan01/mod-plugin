@@ -2,6 +2,7 @@ package me.ogulcan.chatmod;
 
 import be.seeseemelk.mockbukkit.MockBukkit;
 import me.ogulcan.chatmod.Main;
+import me.ogulcan.chatmod.AddWordResult;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -30,7 +31,7 @@ public class AddBlockedWordTest {
     public void testAddBlockedWordPersistsToFile() {
         File file = plugin.getBlockedWordsFile();
         assertNotNull(file, "Blocked words file should not be null");
-        assertTrue(plugin.addBlockedWord("foobar"));
+        assertEquals(AddWordResult.ADDED, plugin.addBlockedWord("foobar"));
         YamlConfiguration cfg = YamlConfiguration.loadConfiguration(file);
         List<String> words = cfg.getStringList("blocked-words");
         assertTrue(words.contains("foobar"));
