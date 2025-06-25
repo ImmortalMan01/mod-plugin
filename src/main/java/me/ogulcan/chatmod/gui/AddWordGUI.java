@@ -83,6 +83,12 @@ public class AddWordGUI implements Listener {
                 String text = anvil.getRenameText();
                 if (text != null) renameText = text;
             }
+            if ((renameText == null || renameText.isBlank()) && e.getCurrentItem() != null) {
+                ItemStack item = e.getCurrentItem();
+                if (item.hasItemMeta() && item.getItemMeta().hasDisplayName()) {
+                    renameText = ChatColor.stripColor(item.getItemMeta().getDisplayName());
+                }
+            }
             if (renameText != null && !renameText.isBlank()) {
                 me.ogulcan.chatmod.AddWordResult result = plugin.addBlockedWord(renameText);
                 saved = true;
