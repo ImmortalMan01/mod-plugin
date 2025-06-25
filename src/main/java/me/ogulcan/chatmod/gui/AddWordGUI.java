@@ -13,8 +13,10 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.PrepareAnvilEvent;
+import com.destroystokyo.paper.event.inventory.PrepareResultEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.event.inventory.InventoryType.SlotType;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -46,17 +48,31 @@ public class AddWordGUI implements Listener {
     @EventHandler
     public void onPrepare(PrepareAnvilEvent e) {
         if (!e.getInventory().equals(inventory)) return;
-        renameText = e.getInventory().getRenameText();
-        ItemStack base = e.getInventory().getItem(0);
+        handlePrepare(e.getInventory(), e);
+    }
+
+    @EventHandler
+    public void onPreparePaper(PrepareResultEvent e) {
+        if (e.getInventory().getType() != InventoryType.ANVIL) return;
+        if (!e.getInventory().equals(inventory)) return;
+        handlePrepare((AnvilInventory) e.getInventory(), e);
+    }
+
+    private void handlePrepare(AnvilInventory inv, org.bukkit.event.Event parent) {
+        renameText = inv.getRenameText();
+        ItemStack base = inv.getItem(0);
+        ItemStack result = null;
         if (base != null && renameText != null && !renameText.isBlank()) {
-            ItemStack result = base.clone();
+            result = base.clone();
             ItemMeta meta = result.getItemMeta();
             meta.setDisplayName(renameText);
             result.setItemMeta(meta);
-            e.setResult(result);
-            e.getInventory().setRepairCost(0);
-        } else {
-            e.setResult(null);
+            inv.setRepairCost(0);
+        }
+        if (parent instanceof PrepareAnvilEvent pae) {
+            pae.setResult(result);
+        } else if (parent instanceof PrepareResultEvent pre) {
+            pre.setResult(result);
         }
     }
 
@@ -64,7 +80,7 @@ public class AddWordGUI implements Listener {
     public void onClick(InventoryClickEvent e) {
         if (e.getWhoClicked() != viewer) return;
         if (!e.getView().getTopInventory().equals(inventory)) return;
-        if (e.getRawSlot() == 2) {
+        if (e.getInventory().getType() == InventoryType.ANVIL && e.getSlotType() == SlotType.RESULT) {
             e.setCancelled(true);
             if (e.getView().getTopInventory() instanceof AnvilInventory anvil) {
                 String text = anvil.getRenameText();
