@@ -258,6 +258,9 @@ public class Main extends JavaPlugin {
 
     public synchronized boolean addBlockedWord(String word) {
         if (blockedWordsFile == null) return false;
+        if (!blockedWordsFile.getParentFile().exists()) {
+            blockedWordsFile.getParentFile().mkdirs();
+        }
         org.bukkit.configuration.file.YamlConfiguration cfg =
                 org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(blockedWordsFile);
         java.util.List<String> words = cfg.getStringList("blocked-words");
@@ -269,7 +272,11 @@ public class Main extends JavaPlugin {
         }
         words.add(word);
         cfg.set("blocked-words", words);
-        try { cfg.save(blockedWordsFile); } catch (Exception ignored) {}
+        try {
+            cfg.save(blockedWordsFile);
+        } catch (Exception e) {
+            getLogger().warning("Failed to save blocked words: " + e.getMessage());
+        }
         wordsLastModified = blockedWordsFile.lastModified();
         if (chatListener != null) chatListener.updateBlockedWords(words);
         return true;
@@ -277,6 +284,9 @@ public class Main extends JavaPlugin {
 
     public synchronized boolean removeBlockedWord(String word) {
         if (blockedWordsFile == null) return false;
+        if (!blockedWordsFile.getParentFile().exists()) {
+            blockedWordsFile.getParentFile().mkdirs();
+        }
         org.bukkit.configuration.file.YamlConfiguration cfg =
                 org.bukkit.configuration.file.YamlConfiguration.loadConfiguration(blockedWordsFile);
         java.util.List<String> words = cfg.getStringList("blocked-words");
@@ -291,7 +301,11 @@ public class Main extends JavaPlugin {
         if (found == null) return false;
         words.remove(found);
         cfg.set("blocked-words", words);
-        try { cfg.save(blockedWordsFile); } catch (Exception ignored) {}
+        try {
+            cfg.save(blockedWordsFile);
+        } catch (Exception e) {
+            getLogger().warning("Failed to save blocked words: " + e.getMessage());
+        }
         wordsLastModified = blockedWordsFile.lastModified();
         if (chatListener != null) chatListener.updateBlockedWords(words);
         return true;
